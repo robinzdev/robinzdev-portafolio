@@ -1,26 +1,146 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-unbounded: var(--font-unbounded), sans-serif;
+  --font-sora: var(--font-sora), sans-serif;
+  --font-sans: var(--font-sora), sans-serif;
+  --font-heading: var(--font-unbounded), sans-serif;
+  --font-mono: var(--font-unbounded), monospace;
+  
+  --color-carbon-main: #131515;
+  --color-carbon-card: #1A1D1D;
+  --color-carbon-border: #2D3232;
+  --color-carbon-hover: #232727;
+
+  --color-ivory-main: #FFFAF0;
+  --color-ivory-card: #FFFFFF;
+  --color-ivory-border: #131515;
+  --color-ivory-hover: #F2ECE0;
+
+  /* Color de Acento Centralizado */
+  --color-accent: var(--color-accent-brand);
+  --color-accent-hover: var(--color-accent-hover);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* FUENTE ÚNICA DE COLOR DE ACENTO (Edita aquí para cambiar toda la web) */
+  --color-accent-brand: #76C457;
+  --color-accent-hover: #65b448;
+  --color-accent-rgb: 118, 196, 87;
+
+  --accent-lime: var(--color-accent-brand);
+  --accent-green: var(--color-accent-brand);
+
+  --bg-primary: #FFFAF0;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #F4EFE5;
+  --text-primary: #131515;
+  --text-muted: #4A5151;
+  --border-main: #131515;
+  --neo-shadow-color: #131515;
+  --grid-line-color: rgba(19, 21, 21, 0.08);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+.dark {
+  /* FUENTE ÚNICA DE COLOR DE ACENTO (Edita aquí para cambiar toda la web) */
+  --color-accent-brand: #76C457;
+  --color-accent-hover: #65b448;
+  --color-accent-rgb: 118, 196, 87;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --accent-lime: var(--color-accent-brand);
+  --accent-green: var(--color-accent-brand);
+
+  --bg-primary: #131515;
+  --bg-surface: #1A1D1D;
+  --bg-surface-elevated: #242929;
+  --text-primary: #FFFAF0;
+  --text-muted: #9EABAB;
+  --border-main: #FFFFFF;
+  --neo-shadow-color: #FFFFFF;
+  --grid-line-color: rgba(255, 250, 240, 0.05);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sora), sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-unbounded), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+/* Background grid pattern inspired by retro-tech */
+.tech-grid-bg {
+  background-image: 
+    linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Neobrutalist box utility */
+.neo-card {
+  background-color: var(--bg-surface);
+  border: 2px solid var(--border-main);
+  box-shadow: 4px 4px 0px 0px var(--neo-shadow-color);
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.neo-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px var(--neo-shadow-color);
+}
+
+/* Neobrutalist interactive buttons with snap-in effect */
+.neo-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 0.625rem 1.25rem;
+  border: 2px solid var(--border-main);
+  box-shadow: 4px 4px 0px 0px var(--neo-shadow-color);
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.12s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, color 0.15s ease;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Snap-in effect: fits into the offset frame on hover/active */
+.neo-button:hover {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px 0px var(--neo-shadow-color);
+}
+
+.neo-button:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px 0px var(--neo-shadow-color);
+}
+
+/* Technical badge */
+.tech-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border: 1.5px solid var(--border-main);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Focus styles for strict a11y */
+:focus-visible {
+  outline: 3px solid var(--color-accent-brand);
+  outline-offset: 2px;
 }
