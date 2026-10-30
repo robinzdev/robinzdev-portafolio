@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Terminal, Mail, Sparkles } from "lucide-react";
+import { Terminal, Mail, Sparkles, Download } from "lucide-react";
 import { personalInfo } from "@/data/portfolioData";
 import { MorphIcon } from "@/components/MorphIcon";
 import { GithubIcon } from "@/components/icons/GithubIcon";
@@ -15,9 +15,9 @@ export function Hero() {
       gridSize={36}
       speed={7}
       initialDirection="down-right"
-      className="w-full pt-12 pb-20 sm:pt-16 sm:pb-28 border-b-2 border-[var(--border-main)]"
+      className="w-full min-h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] flex flex-col justify-center border-b border-[var(--border-main)] py-12 sm:py-16 lg:py-0"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           
           {/* Columna Izquierda: Información Principal */}
@@ -27,27 +27,14 @@ export function Hero() {
             transition={{ duration: 0.45, ease: "easeOut" }}
             className="lg:col-span-7 flex flex-col items-start space-y-6"
           >
-            {/* Status Pill */}
-            <div className="tech-pill bg-[var(--bg-surface)] text-[var(--text-primary)]">
-              <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse border border-[var(--border-main)]" />
-              <span>{personalInfo.status}</span>
-            </div>
-
             {/* Titular Principal en Unbounded */}
             <div className="space-y-3">
-              <span className="font-mono text-xs uppercase tracking-widest text-accent font-bold">
+              <span className="font-mono text-xs uppercase tracking-widest text-[var(--text-primary)] opacity-60 font-semibold">
                 Arquitectura Web & Sistemas Visuales
               </span>
-              <h1 className="font-['Unbounded',sans-serif] text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight uppercase text-[var(--text-primary)] leading-[1.12]">
+              <h1 className="font-['Unbounded',sans-serif] text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-semibold tracking-tight uppercase text-[var(--text-primary)] leading-[1.02]">
                 Robin <span className="text-accent block sm:inline">Dev.</span>
               </h1>
-            </div>
-
-            {/* Subtítulo de Rol Híbrido */}
-            <div className="inline-block p-2.5 bg-[var(--bg-surface)] border-2 border-[var(--border-main)] shadow-[3px_3px_0px_0px_var(--neo-shadow-color)]">
-              <p className="font-mono text-xs sm:text-sm font-bold text-[var(--text-primary)]">
-                Licenciado en Informática · Full-Stack Developer + Diseñador Gráfico
-              </p>
             </div>
 
             {/* Biografía Corta */}
@@ -60,6 +47,17 @@ export function Hero() {
               <Button href="#proyectos" variant="primary" size="md">
                 <span>Explorar Proyectos</span>
                 <MorphIcon type="arrow-corner" size={16} />
+              </Button>
+
+              <Button
+                href={personalInfo.cvUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="secondary"
+                size="md"
+              >
+                <Download className="w-4 h-4 text-accent" />
+                <span>Descargar CV</span>
               </Button>
 
               <Button href="#contacto" variant="secondary" size="md">
@@ -83,7 +81,7 @@ export function Hero() {
             <div className="pt-4 flex flex-wrap items-center gap-4 text-xs font-mono text-[var(--text-muted)]">
               <span className="flex items-center gap-1.5">
                 <Terminal className="w-3.5 h-3.5 text-accent" />
-                <span>Next.js 16 + React 19</span>
+                <span>Vite + React</span>
               </span>
               <span className="opacity-40">/</span>
               <span className="flex items-center gap-1.5">
@@ -91,7 +89,7 @@ export function Hero() {
                 <span>Figma & Design Systems</span>
               </span>
               <span className="opacity-40">/</span>
-              <span>Santiago, RD</span>
+              <span>Castillo, RD</span>
             </div>
           </motion.div>
 

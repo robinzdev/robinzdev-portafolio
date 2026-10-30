@@ -25,7 +25,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Robin | Full-Stack Developer & UI/UX Designer",
   description: "Portafolio profesional de Robin (robinzdev). Licenciado en Informática, Desarrollador Full-Stack y Diseñador Gráfico. Arquitectura web neobrutalista y retro-tech.",
-  keywords: ["Full-Stack Developer", "Next.js", "React", "TypeScript", "Tailwind CSS", "UI/UX Designer", "Neobrutalism", "Santiago", "República Dominicana"],
+  keywords: ["Full-Stack Developer", "Vite", "React", "TypeScript", "Tailwind CSS", "UI/UX Designer", "Neobrutalism", "Castillo", "República Dominicana"],
   authors: [{ name: "Robin" }],
 };
 
@@ -40,6 +40,7 @@ export default function RootLayout({
         className="min-h-screen flex flex-col font-sans selection:bg-accent selection:text-[#131515]"
         suppressHydrationWarning
       >
+        
         <ThemeProvider>
           {children}
         </ThemeProvider>

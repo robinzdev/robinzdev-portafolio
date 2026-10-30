@@ -12,9 +12,10 @@ export function ThemeToggle() {
   return (
     <Button
       type="button"
-      onClick={toggleTheme}
+      onClick={(e) => toggleTheme(e)}
       variant="secondary"
       size="sm"
+      className="rounded-[8px]"
       aria-label={`Cambiar a modo ${isDark ? "claro" : "oscuro"}`}
     >
       <MorphIcon type="sun-moon" active={isDark} size={15} />
@@ -22,4 +23,3 @@ export function ThemeToggle() {
     </Button>
   );
 }
-

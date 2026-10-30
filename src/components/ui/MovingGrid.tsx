@@ -13,6 +13,7 @@ export type GridDirection =
   | "up";
 
 export interface MovingGridProps {
+  id?: string;
   /** Tamaño de cada celda del grid en píxeles */
   gridSize?: number;
   /** Velocidad de desplazamiento en píxeles por segundo (más suave/alpaso por defecto) */
@@ -58,6 +59,7 @@ const DEFAULT_CYCLE: GridDirection[] = [
 ];
 
 export function MovingGrid({
+  id,
   gridSize = 36,
   speed = 7, // Desplazamiento más lento y suave (alpaso)
   initialDirection = "down-right",
@@ -153,7 +155,7 @@ export function MovingGrid({
     const resolveHighlightColor = () => {
       if (highlightFillColor) return highlightFillColor;
       const rgb = getComputedStyle(canvas).getPropertyValue("--color-accent-rgb").trim();
-      return `rgba(${rgb || "118, 196, 87"}, 0.12)`;
+      return `rgba(${rgb || "154, 216, 114"}, 0.12)`;
     };
 
     // Bucle continuo a 60 FPS con pausa en viewport
@@ -254,6 +256,7 @@ export function MovingGrid({
   return (
     <div
       ref={containerRef}
+      id={id}
       onClick={handleToggleDirection}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
@@ -264,7 +267,7 @@ export function MovingGrid({
         className="absolute inset-0 w-full h-full pointer-events-none select-none z-0"
         aria-hidden="true"
       />
-      <div className="relative z-10 w-full h-full pointer-events-auto">
+      <div className="relative z-10 w-full h-full flex-1 flex flex-col justify-center pointer-events-auto">
         {children}
       </div>
     </div>

@@ -5,7 +5,7 @@ export const personalInfo = {
   tagline: "Lic. en Informática · Full-Stack Developer · Diseñador Gráfico",
   bio: "Especializado en diseñar e implementar arquitecturas web resilientes, experiencias interactivas y sistemas visuales con enfoque neobrutalista y retro-tech. Convergencia directa entre rigor de ingeniería de software y sensibilidad gráfica.",
   status: "Disponible para nuevos proyectos y consultoría técnica",
-  location: "Santiago, República Dominicana",
+  location: "Castillo, República Dominicana",
   github: "https://github.com/robinzdev",
   email: "contacto@robindev.pro",
   cvUrl: "#cv",
@@ -13,16 +13,16 @@ export const personalInfo = {
 
 export const projectsData: Project[] = [
   {
-    id: "noteazy",
-    title: "Noteazy",
-    tagline: "Sistema colaborativo de notas y gestión de conocimiento",
-    description: "Plataforma web integral para organización de notas en tiempo real con sincronización offline-first, editor Markdown enriquecido y categorización jerárquica de proyectos.",
-    tags: ["Next.js", "TypeScript", "Tailwind CSS", "PostgreSQL", "Node.js"],
-    role: "Full-Stack & UI/UX Designer",
-    liveUrl: "https://noteazy.app",
-    githubUrl: "https://github.com/robinzdev/noteazy",
+    id: "siger-fmc",
+    title: "SIGER-FMC",
+    tagline: "Sistema de gestión y control de recursos operativos",
+    description: "Software corporativo para administración de inventario, auditoría de procesos y generación automatizada de informes analíticos con visualización de métricas críticas.",
+    tags: ["Next.js", "PostgreSQL", "Prisma", "Express", "TypeScript"],
+    role: "Software Architect & Backend Developer",
+    liveUrl: "https://siger-fmc.app",
+    githubUrl: "https://github.com/robinzdev/siger-fmc",
     featured: true,
-    year: "2025",
+    year: "2024",
   },
   {
     id: "bitxels-studio",
@@ -37,16 +37,16 @@ export const projectsData: Project[] = [
     year: "2024",
   },
   {
-    id: "siger-fmc",
-    title: "SIGER-FMC",
-    tagline: "Sistema de gestión y control de recursos operativos",
-    description: "Software corporativo para administración de inventario, auditoría de procesos y generación automatizada de informes analíticos con visualización de métricas críticas.",
-    tags: ["Next.js", "PostgreSQL", "Prisma", "Express", "TypeScript"],
-    role: "Software Architect & Backend Developer",
-    liveUrl: "https://siger-fmc.app",
-    githubUrl: "https://github.com/robinzdev/siger-fmc",
+    id: "noteazy",
+    title: "Noteazy",
+    tagline: "Sistema colaborativo de notas y gestión de conocimiento",
+    description: "Plataforma web integral para organización de notas en tiempo real con sincronización offline-first, editor Markdown enriquecido y categorización jerárquica de proyectos.",
+    tags: ["Next.js", "TypeScript", "Tailwind CSS", "PostgreSQL", "Node.js"],
+    role: "Full-Stack & UI/UX Designer",
+    liveUrl: "https://noteazy.app",
+    githubUrl: "https://github.com/robinzdev/noteazy",
     featured: true,
-    year: "2024",
+    year: "2025",
   },
 ];
 
@@ -154,4 +154,3 @@ export const skillCategories: SkillCategory[] = [
     ],
   },
 ];
-

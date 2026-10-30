@@ -29,22 +29,35 @@ Sitio web personal y portafolio interactivo de Robin, Licenciado en Informática
    - Motor Canvas 2D con desplazamiento suave continuo y cambio de orientación al interactuar.
    - Detección de celda bajo el cursor con resaltado sutil en verde acento al 12% de opacidad sin bordes intrusivos.
    - Optimización de rendimiento a 60 FPS: pausa automática del ciclo de renderizado mediante IntersectionObserver al salir del viewport (0% de CPU en reposo).
+   - Soporte para anclaje nativo de navegación (`id`) alineado con los márgenes de la barra de navegación.
 
-3. Barra de navegación contextual (Navbar):
+3. Tipografía interactiva con físicas y colapso (GravityLetters):
+   - Efecto tipográfico retro-tech inspirado en React Bits Pro integrado en el bloque de cierre del footer ("ROBIN DEV").
+   - Muestreo vectorial de glifos en cuadrícula densa con caracteres ASCII dinámicos.
+   - Mecánicas interactivas: corte con cuchilla por cursor (`cutWidth`), dispersión física (`throwForce`), y onda de colapso en cascada al hacer clic.
+   - Separación estructural por fragmentos desconectados (algoritmo BFS de 8 direcciones): al cortar una letra, los trozos sin anclaje superior caen en bloque como islas físicas.
+   - Acumulación orgánica en el piso: dunas de arena que se reorganizan de forma natural cuando las letras ascienden de regreso.
+   - Rendimiento extremo (Texture Atlas): pre-renderizado de glifos en hoja de sprites fuera de pantalla, eliminando cálculos de transformación en cada frame (0.2 ms por cuadro).
+   - Reactividad en tiempo real ante cambio de tema claro/oscuro mediante MutationObserver sin reiniciar partículas.
+
+4. Barra de navegación contextual (Navbar):
    - Inspirada en la interfaz técnica de plataformas contemporáneas de desarrollo.
    - Cada enlace cuenta con su respectivo icono temático y color característico (Proyectos en Cyan, Experiencia en Ámbar, Habilidades en Púrpura, Contacto en Verde Marca).
+   - Navegación por anclajes calibrada con espaciado uniforme respecto a la barra fija.
    - Adaptable a dispositivos móviles con menú lateral accesible por teclado.
 
-4. Modo oscuro y claro sincronizado (ThemeProvider):
+5. Modo oscuro y claro sincronizado (ThemeProvider) con View Transitions:
    - Implementación basada en useSyncExternalStore de React 19 para prevenir parpadeos y desajustes de hidratación (hydration mismatch).
-   - Detección automática de preferencia del sistema operativo y persistencia local.
+   - Transición visual cinemática mediante View Transition API con revelado circular progresivo desde las coordenadas del cursor.
+   - Paleta de color centralizada en variables CSS (--color-accent-brand: #9AD872) con alto contraste accesible en modo claro (#4E872A).
 
-5. Secciones completas de portafolio:
+6. Secciones completas de portafolio y microinteracciones:
    - Hero: Titular brutalista, microespecificaciones técnicas y consola DEV_ID con avatar retro-tech.
-   - Proyectos: Catálogo de iniciativas con roles, etiquetas de tecnologías y enlaces directos.
-   - Experiencia: Línea de tiempo cronológica con logros cuantitativos e impacto de ingeniería.
+   - Proyectos: Catálogo de iniciativas con roles, etiquetas de tecnologías, carrusel responsivo y enlaces directos.
+   - Experiencia: Línea de tiempo cronológica con avance progresivo continuo de riel verde acento sin cortes entre hitos, e iconos SVG técnicos de cada tecnología (TechIcons).
    - Competencias y Estudios: Clasificación por competencias técnicas de desarrollo y diseño UI/UX, formación universitaria en UASD y certificaciones.
    - Contacto: Canal directo con botón de copiado rápido y formulario validado con simulación de envío y estado de confirmación.
+   - Animaciones controladas: Ejecución estricta de una sola vez por carga de página (`viewport: { once: true }`), evitando reinicios distractores al desplazarse entre secciones.
 
 ## Estructura del Proyecto
 
@@ -57,8 +70,8 @@ robindev/
 │   │   ├── layout.tsx     # RootLayout con fuentes Unbounded/Sora y ThemeProvider
 │   │   └── page.tsx       # Ensamblado principal de la página
 │   ├── components/        # Componentes modulares
-│   │   ├── icons/         # Iconos SVG nativos (GithubIcon, etc.)
-│   │   ├── ui/            # Primitivas de UI (Button, MovingGrid)
+│   │   ├── icons/         # Iconos SVG nativos (GithubIcon, TechIcons)
+│   │   ├── ui/            # Primitivas de UI (Button, MovingGrid, GravityLetters)
 │   │   ├── ContactFooter.tsx
 │   │   ├── Hero.tsx
 │   │   ├── MorphIcon.tsx

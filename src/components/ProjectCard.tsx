@@ -4,19 +4,27 @@ import React from "react";
 import { Project } from "@/types/portfolio";
 import { ExternalLink, Layers } from "lucide-react";
 import { GithubIcon } from "@/components/icons/GithubIcon";
+import { TechIcon } from "@/components/icons/TechIcons";
 import { Button } from "@/components/ui/Button";
 
 interface ProjectCardProps {
   project: Project;
   featured?: boolean;
+  className?: string;
+  isActive?: boolean;
 }
 
-export function ProjectCard({ project, featured = false }: ProjectCardProps) {
+export function ProjectCard({
+  project,
+  featured = false,
+  className = "",
+  isActive = true,
+}: ProjectCardProps) {
   return (
     <article
-      className={`neo-card flex flex-col justify-between p-6 sm:p-7 relative ${
+      className={`bg-[var(--bg-surface)] flex flex-col justify-between p-6 sm:p-7 relative h-full transition-colors ${
         featured ? "lg:col-span-2" : "col-span-1"
-      }`}
+      } ${className}`.trim()}
     >
       <div>
         {/* Encabezado de la tarjeta */}
@@ -47,15 +55,24 @@ export function ProjectCard({ project, featured = false }: ProjectCardProps) {
           {project.description}
         </p>
 
-        {/* Stack tecnológico */}
-        <div className="flex flex-wrap gap-1.5 mb-6">
+        {/* Stack tecnológico solo con iconos (con color en activo y monocromo plano con opacidad en inactivo) */}
+        <div className="flex flex-wrap items-center gap-x-6 sm:gap-x-7 gap-y-3 mb-6">
           {project.tags.map((tag) => (
-            <span
+            <div
               key={tag}
-              className="text-[11px] font-mono px-2 py-1 bg-[var(--bg-primary)] border border-[var(--border-main)] text-[var(--text-primary)] font-medium"
+              title={tag}
+              className={`group/tech select-none flex items-center justify-center transition-all duration-300 text-[var(--text-primary)] ${
+                isActive
+                  ? "opacity-100 hover:scale-115 cursor-default"
+                  : "opacity-40 hover:opacity-75 cursor-pointer"
+              }`}
             >
-              #{tag}
-            </span>
+              <TechIcon
+                name={tag}
+                monochrome={!isActive}
+                className="w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform duration-200"
+              />
+            </div>
           ))}
         </div>
       </div>

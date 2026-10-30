@@ -21,14 +21,14 @@
 
   /* Color de Acento Centralizado */
   --color-accent: var(--color-accent-brand);
-  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-hover: var(--color-accent-brand);
 }
 
 :root {
   /* FUENTE ÚNICA DE COLOR DE ACENTO (Edita aquí para cambiar toda la web) */
-  --color-accent-brand: #76C457;
-  --color-accent-hover: #65b448;
-  --color-accent-rgb: 118, 196, 87;
+  --color-accent-brand: #9AD872;
+  --color-accent-hover: #9AD872;
+  --color-accent-rgb: 154, 216, 114;
 
   --accent-lime: var(--color-accent-brand);
   --accent-green: var(--color-accent-brand);
@@ -45,9 +45,9 @@
 
 .dark {
   /* FUENTE ÚNICA DE COLOR DE ACENTO (Edita aquí para cambiar toda la web) */
-  --color-accent-brand: #76C457;
-  --color-accent-hover: #65b448;
-  --color-accent-rgb: 118, 196, 87;
+  --color-accent-brand: #9AD872;
+  --color-accent-hover: #9AD872;
+  --color-accent-rgb: 154, 216, 114;
 
   --accent-lime: var(--color-accent-brand);
   --accent-green: var(--color-accent-brand);
@@ -143,4 +143,19 @@ h1, h2, h3, h4, h5, h6 {
 :focus-visible {
   outline: 3px solid var(--color-accent-brand);
   outline-offset: 2px;
+}
+
+/* View Transition API para revelado circular fluido de tema */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
 }

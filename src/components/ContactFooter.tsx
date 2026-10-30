@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { personalInfo } from "@/data/portfolioData";
 import { Copy, Check, Send, ArrowUp } from "lucide-react";
 import { GithubIcon } from "@/components/icons/GithubIcon";
 import { Button } from "@/components/ui/Button";
+import { GravityLetters } from "@/components/ui/GravityLetters";
 
 export function ContactFooter() {
   const [copied, setCopied] = useState(false);
@@ -28,20 +30,43 @@ export function ContactFooter() {
   };
 
   return (
-    <footer id="contacto" className="border-t-2 border-[var(--border-main)] bg-[var(--bg-primary)]">
+    <footer id="contacto" className="border-t border-[var(--border-main)] bg-[var(--bg-primary)]">
       {/* Sección de Contacto */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           
           {/* Columna Izquierda: Información de Contacto */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-6 space-y-6">
             <div className="space-y-2">
-              <span className="font-mono text-xs font-bold text-accent">
+              <motion.span
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px 0px" }}
+                transition={{ duration: 0.6, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+                className="font-mono text-xs font-semibold text-[var(--text-primary)] opacity-60 tracking-wider block"
+              >
                 [04 // CONTACTO]
-              </span>
-              <h2 className="font-['Unbounded',sans-serif] text-3xl sm:text-4xl font-bold tracking-tight uppercase text-[var(--text-primary)]">
-                Construyamos juntos.
+              </motion.span>
+              <h2 className="font-['Unbounded',sans-serif] text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-semibold tracking-tight uppercase text-[var(--text-primary)] leading-[1.06]">
+                <motion.span
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px 0px" }}
+                  transition={{ duration: 0.75, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  className="block"
+                >
+                  Construyamos
+                </motion.span>
+                <motion.span
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px 0px" }}
+                  transition={{ duration: 0.75, delay: 0.36, ease: [0.16, 1, 0.3, 1] }}
+                  className="block text-accent"
+                >
+                  juntos.
+                </motion.span>
               </h2>
             </div>
 
@@ -96,7 +121,7 @@ export function ContactFooter() {
           </div>
 
           {/* Columna Derecha: Formulario Interactivo */}
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-6">
             <div className="neo-card p-6 sm:p-8">
               <div className="pb-4 mb-6 border-b-2 border-[var(--border-main)] flex items-center justify-between">
                 <span className="font-mono text-xs uppercase tracking-wider font-bold text-[var(--text-primary)]">
@@ -187,8 +212,9 @@ export function ContactFooter() {
 
       </div>
 
-      {/* Barra de Créditos & Cierre */}
-      <div className="border-t-2 border-[var(--border-main)] bg-[var(--bg-surface)] py-6">
+      {/* Bloque Unificado de Cierre del Footer con Gravity Letters */}
+      <div className="border-t-2 border-[var(--border-main)] bg-[var(--bg-surface)] pt-6">
+        {/* Barra superior de créditos y botón volver arriba integrada */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="font-['Unbounded',sans-serif] font-bold text-xs tracking-tight text-[var(--text-primary)]">
@@ -210,10 +236,32 @@ export function ContactFooter() {
               size="icon"
               aria-label="Volver arriba"
             >
-              <ArrowUp className="w-4 h-4" />
+              <ArrowUp className="w-4 h-4 text-accent" />
             </Button>
           </div>
         </div>
+
+        {/* Efecto Gravity Letters integrado en el mismo bloque */}
+        <GravityLetters
+          line1="ROBIN"
+          line2="DEV"
+          widthPercent={0.94}
+          cutWidth={14}
+          throwForce={1.2}
+          clickToCollapse={true}
+          collapseSpeed={1500}
+          erosion={0}
+          healDelay={4.0}
+          holdTime={4.0}
+          returnDuration={0.75}
+          charSize={11}
+          charStepX={9}
+          charStepY={14}
+          gravity={0.48}
+          accentColor="#9AD872"
+          accentRatio={0.18}
+          className="w-full"
+        />
       </div>
     </footer>
   );

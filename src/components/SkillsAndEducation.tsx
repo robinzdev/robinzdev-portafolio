@@ -1,28 +1,48 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
 import { skillCategories, educationData, certificatesData } from "@/data/portfolioData";
 import { GraduationCap, Award, Cpu, Palette } from "lucide-react";
 
 export function SkillsAndEducation() {
   return (
-    <section id="habilidades" className="py-20 border-b-2 border-[var(--border-main)]">
+    <section id="habilidades" className="py-20 border-b border-[var(--border-main)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Cabecera de Sección */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-16 pb-6 border-b-2 border-[var(--border-main)]">
-          <div className="space-y-2">
-            <span className="font-mono text-xs font-bold text-accent">
+        <div className="mb-16 pb-6 border-b border-[var(--border-main)]">
+          <div className="space-y-2 max-w-4xl">
+            <motion.span
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px 0px" }}
+              transition={{ duration: 0.6, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+              className="font-mono text-xs font-semibold text-[var(--text-primary)] opacity-60 tracking-wider block"
+            >
               [03 // COMPETENCIAS]
-            </span>
-            <h2 className="font-['Unbounded',sans-serif] text-2xl sm:text-4xl font-bold tracking-tight uppercase text-[var(--text-primary)]">
-              Skills, Estudios & Credenciales
+            </motion.span>
+            <h2 className="font-['Unbounded',sans-serif] text-4xl sm:text-6xl lg:text-7xl font-semibold tracking-tight uppercase text-[var(--text-primary)] leading-[1.06]">
+              <motion.span
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px 0px" }}
+                transition={{ duration: 0.75, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                className="block"
+              >
+                Skills, Estudios &
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px 0px" }}
+                transition={{ duration: 0.75, delay: 0.36, ease: [0.16, 1, 0.3, 1] }}
+                className="block text-accent"
+              >
+                Credenciales
+              </motion.span>
             </h2>
           </div>
-          
-          <p className="font-mono text-xs sm:text-sm text-[var(--text-muted)] max-w-md">
-            Dominio técnico multidisciplinario: ingeniería de software robusta y diseño visual contemporáneo.
-          </p>
         </div>
 
         {/* Bloque 1: Habilidades Técnicas y Creativas en 2 columnas */}
