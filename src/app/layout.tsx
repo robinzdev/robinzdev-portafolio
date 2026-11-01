@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Unbounded, Sora } from "next/font/google";
+import { Unbounded, Sora, Roboto_Flex } from "next/font/google";
 import { ThemeProvider } from "@/context/ThemeContext";
 import "./globals.css";
 
@@ -15,6 +15,13 @@ const sora = Sora({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
+});
+
+const robotoFlex = Roboto_Flex({
+  variable: "--font-roboto-flex",
+  subsets: ["latin"],
+  display: "swap",
+  axes: ["wdth"],
 });
 
 export const viewport: Viewport = {
@@ -35,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${unbounded.variable} ${sora.variable} dark`} suppressHydrationWarning>
+    <html lang="es" className={`${unbounded.variable} ${sora.variable} ${robotoFlex.variable} dark`} suppressHydrationWarning>
       <body
         className="min-h-screen flex flex-col font-sans selection:bg-accent selection:text-[#131515]"
         suppressHydrationWarning

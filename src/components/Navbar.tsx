@@ -52,8 +52,8 @@ export function Navbar() {
           href="/"
           className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          <span className="font-['Unbounded',sans-serif] font-bold text-sm sm:text-base tracking-tight text-[var(--text-primary)]">
-            ROBIN<span className="text-accent">.DEV</span>
+          <span className="font-['Unbounded',sans-serif] font-semibold text-sm sm:text-base tracking-tight lowercase text-[var(--text-primary)]">
+            robin<span className="text-accent">.dev</span>
           </span>
         </Link>
 
@@ -65,7 +65,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="h-full flex items-center gap-2 px-3.5 lg:px-4 text-xs uppercase font-mono tracking-wider text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] border border-transparent hover:border-[var(--border-main)] transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="h-full flex items-center gap-2 px-3.5 lg:px-4 text-xs uppercase font-mono tracking-wider text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <Icon
                   className="w-4 h-4 transition-all duration-200 group-hover:scale-110 shrink-0 fill-transparent group-hover:fill-current"
@@ -109,7 +109,7 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 text-sm uppercase font-mono tracking-wider font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] px-3 py-2.5 border border-transparent hover:border-[var(--border-main)] transition-all group"
+                  className="flex items-center gap-3 text-sm uppercase font-mono tracking-wider font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] px-3 py-2.5 transition-all group"
                 >
                   <span
                     className="w-7 h-7 flex items-center justify-center border border-[var(--border-main)] bg-[var(--bg-primary)] shrink-0 shadow-[1px_1px_0px_0px_var(--neo-shadow-color)]"

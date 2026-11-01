@@ -6,8 +6,11 @@ import { Terminal, Mail, Sparkles, Download } from "lucide-react";
 import { personalInfo } from "@/data/portfolioData";
 import { MorphIcon } from "@/components/MorphIcon";
 import { GithubIcon } from "@/components/icons/GithubIcon";
+import { LinkedInIcon, InstagramIcon } from "@/components/icons/SocialIcons";
 import { Button } from "@/components/ui/Button";
 import { MovingGrid } from "@/components/ui/MovingGrid";
+import { VariableTextWave } from "@/components/ui/VariableTextWave";
+import { HeroCard3D } from "@/components/ui/HeroCard3D";
 
 export function Hero() {
   return (
@@ -27,25 +30,23 @@ export function Hero() {
             transition={{ duration: 0.45, ease: "easeOut" }}
             className="lg:col-span-7 flex flex-col items-start space-y-6"
           >
-            {/* Titular Principal en Unbounded */}
+            {/* Titular Principal con Efecto Variable Text Wave */}
             <div className="space-y-3">
-              <span className="font-mono text-xs uppercase tracking-widest text-[var(--text-primary)] opacity-60 font-semibold">
-                Arquitectura Web & Sistemas Visuales
+              <span className="font-mono text-xs uppercase tracking-widest text-[var(--text-primary)] opacity-60 font-semibold block">
+                &gt; LICENCIADO EN INFORMÁTICA &amp; UI/UX DESIGNER // LOCATED IN CASTILLO, RD
               </span>
-              <h1 className="font-['Unbounded',sans-serif] text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-semibold tracking-tight uppercase text-[var(--text-primary)] leading-[1.02]">
-                Robin <span className="text-accent block sm:inline">Dev.</span>
-              </h1>
+              <VariableTextWave />
             </div>
 
-            {/* Biografía Corta */}
+            {/* Párrafo de Impacto */}
             <p className="text-base sm:text-lg text-[var(--text-muted)] max-w-2xl leading-relaxed">
-              {personalInfo.bio}
+              Hay devs que no saben alinear un botón y diseñadores que no entienden de bases de datos. Yo hago ambas cosas, y las hago bien. Construyo sistemas web rápidos, limpios y con alma retro-tech, mezclando la lógica de backend con una obsesión enfermiza por el diseño gráfico.
             </p>
 
             {/* Botones de Acción (CTAs) */}
             <div className="flex flex-wrap items-center gap-4 pt-2 w-full sm:w-auto">
               <Button href="#proyectos" variant="primary" size="md">
-                <span>Explorar Proyectos</span>
+                <span>Proyectos</span>
                 <MorphIcon type="arrow-corner" size={16} />
               </Button>
 
@@ -57,12 +58,12 @@ export function Hero() {
                 size="md"
               >
                 <Download className="w-4 h-4 text-accent" />
-                <span>Descargar CV</span>
+                <span>CV</span>
               </Button>
 
               <Button href="#contacto" variant="secondary" size="md">
                 <Mail className="w-4 h-4 text-accent" />
-                <span>Iniciar Contacto</span>
+                <span>Contacto</span>
               </Button>
 
               <Button
@@ -75,79 +76,58 @@ export function Hero() {
               >
                 <GithubIcon className="w-5 h-5" size={20} />
               </Button>
+
+              {personalInfo.linkedin && (
+                <Button
+                  href={personalInfo.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="secondary"
+                  size="icon"
+                  aria-label="Perfil de LinkedIn robinzdev"
+                >
+                  <LinkedInIcon className="w-5 h-5" size={20} />
+                </Button>
+              )}
+
+              {personalInfo.instagram && (
+                <Button
+                  href={personalInfo.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="secondary"
+                  size="icon"
+                  aria-label="Perfil de Instagram robinfdezz"
+                >
+                  <InstagramIcon className="w-5 h-5" size={20} />
+                </Button>
+              )}
             </div>
 
-            {/* Micro-especificación retro-tech */}
+            {/* Especificación retro-tech inferior (estilo anterior con iconos y separadores) */}
             <div className="pt-4 flex flex-wrap items-center gap-4 text-xs font-mono text-[var(--text-muted)]">
               <span className="flex items-center gap-1.5">
                 <Terminal className="w-3.5 h-3.5 text-accent" />
-                <span>Vite + React</span>
+                <span>React / Next.js</span>
               </span>
               <span className="opacity-40">/</span>
               <span className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-accent" />
-                <span>Figma & Design Systems</span>
+                <span>UI/UX Systems</span>
               </span>
               <span className="opacity-40">/</span>
-              <span>Castillo, RD</span>
+              <span>Full-Stack</span>
             </div>
           </motion.div>
 
-          {/* Columna Derecha: Contenedor Neobrutalista para Foto / Avatar */}
+          {/* Columna Derecha: Tarjeta 3D Neobrutalista Interactiva */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.45, delay: 0.1, ease: "easeOut" }}
             className="lg:col-span-5 flex justify-center lg:justify-end"
           >
-            <div className="relative w-full max-w-sm">
-              {/* Marco de fondo decorativo */}
-              <div className="absolute inset-0 bg-accent translate-x-3 translate-y-3 border-2 border-[var(--border-main)]" />
-
-              {/* Contenedor principal de imagen */}
-              <div className="relative neo-card p-6 bg-[var(--bg-surface)]">
-                {/* Cabecera de consola retro-tech */}
-                <div className="flex items-center justify-between pb-4 mb-4 border-b-2 border-[var(--border-main)]">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[var(--border-main)]" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-[var(--border-main)]" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-[var(--border-main)]" />
-                  </div>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-bold">
-                    DEV_ID // ROBINZDEV
-                  </span>
-                </div>
-
-                {/* Área de imagen / avatar geométrico */}
-                <div className="relative aspect-square w-full border-2 border-[var(--border-main)] bg-[var(--bg-primary)] overflow-hidden flex flex-col items-center justify-center p-4">
-                  {/* Marcas de registro en esquinas */}
-                  <span className="absolute top-1 left-1 font-mono text-[9px] text-[var(--text-muted)] select-none">+</span>
-                  <span className="absolute top-1 right-1 font-mono text-[9px] text-[var(--text-muted)] select-none">+</span>
-                  <span className="absolute bottom-1 left-1 font-mono text-[9px] text-[var(--text-muted)] select-none">+</span>
-                  <span className="absolute bottom-1 right-1 font-mono text-[9px] text-[var(--text-muted)] select-none">+</span>
-
-                  {/* Composición visual retro-tech minimalista */}
-                  <div className="w-28 h-28 border-2 border-[var(--border-main)] bg-accent shadow-[4px_4px_0px_0px_var(--border-main)] flex items-center justify-center mb-3">
-                    <span className="font-['Unbounded',sans-serif] font-black text-4xl text-[#131515]">
-                      RZ
-                    </span>
-                  </div>
-
-                  <p className="font-mono text-xs font-bold text-[var(--text-primary)] uppercase tracking-wide text-center">
-                    Robin Z.
-                  </p>
-                  <p className="font-mono text-[11px] text-[var(--text-muted)] text-center">
-                    Full-Stack & UI/UX Designer
-                  </p>
-                </div>
-
-                {/* Badge inferior de credencial */}
-                <div className="mt-4 pt-3 border-t-2 border-[var(--border-main)] flex items-center justify-between text-[11px] font-mono">
-                  <span className="text-[var(--text-muted)]">STATUS</span>
-                  <span className="font-bold text-[var(--accent-green)]">ONLINE (60 FPS)</span>
-                </div>
-              </div>
-            </div>
+            <HeroCard3D />
           </motion.div>
 
         </div>

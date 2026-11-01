@@ -15,8 +15,10 @@ export function Timeline() {
   });
 
   // Avance progresivo continuo sin cortes entre marcadores
-  const progress1 = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
-  const progress2 = useTransform(scrollYProgress, [0.5, 1], [0, 1]);
+  const totalSteps = Math.max(experienceData.length - 1, 1);
+  const progress1 = useTransform(scrollYProgress, [0, 1 / totalSteps], [0, 1]);
+  const progress2 = useTransform(scrollYProgress, [1 / totalSteps, 2 / totalSteps], [0, 1]);
+  const progress3 = useTransform(scrollYProgress, [2 / totalSteps, 1], [0, 1]);
 
   return (
     <MovingGrid
@@ -67,7 +69,7 @@ export function Timeline() {
         <div ref={containerRef} className="flex flex-col">
           {experienceData.map((exp, index) => {
             const isLast = index === experienceData.length - 1;
-            const progress = index === 0 ? progress1 : progress2;
+            const progress = index === 0 ? progress1 : index === 1 ? progress2 : progress3;
 
             return (
               <div key={exp.id} className="flex gap-4 sm:gap-8 items-stretch group">
@@ -162,7 +164,7 @@ export function Timeline() {
                         >
                           <TechIcon
                             name={skill}
-                            className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover/tech:scale-110"
+                            className="w-4 h-4 shrink-0 transition-opacity duration-200"
                           />
                           <span className="font-mono text-xs font-normal text-[var(--text-muted)] group-hover/tech:text-[var(--text-primary)] transition-colors">
                             {skill}

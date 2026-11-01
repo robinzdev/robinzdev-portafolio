@@ -22,9 +22,8 @@ export function ProjectCard({
 }: ProjectCardProps) {
   return (
     <article
-      className={`bg-[var(--bg-surface)] flex flex-col justify-between p-6 sm:p-7 relative h-full transition-colors ${
-        featured ? "lg:col-span-2" : "col-span-1"
-      } ${className}`.trim()}
+      className={`bg-[var(--bg-surface)] flex flex-col justify-between p-6 sm:p-7 relative h-full transition-colors ${featured ? "lg:col-span-2" : "col-span-1"
+        } ${className}`.trim()}
     >
       <div>
         {/* Encabezado de la tarjeta */}
@@ -61,52 +60,53 @@ export function ProjectCard({
             <div
               key={tag}
               title={tag}
-              className={`group/tech select-none flex items-center justify-center transition-all duration-300 text-[var(--text-primary)] ${
-                isActive
-                  ? "opacity-100 hover:scale-115 cursor-default"
+              className={`select-none flex items-center justify-center transition-opacity duration-200 text-[var(--text-primary)] ${isActive
+                  ? "opacity-100 cursor-default"
                   : "opacity-40 hover:opacity-75 cursor-pointer"
-              }`}
+                }`}
             >
               <TechIcon
                 name={tag}
                 monochrome={!isActive}
-                className="w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform duration-200"
+                className="w-5 h-5 sm:w-6 sm:h-6 shrink-0"
               />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Enlaces y Acciones */}
-      <div className="pt-4 border-t-2 border-[var(--border-main)] flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          {project.githubUrl && (
-            <Button
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="secondary"
-              size="icon"
-              aria-label={`Código fuente de ${project.title} en GitHub`}
-            >
-              <GithubIcon className="w-4 h-4" size={16} />
-            </Button>
-          )}
-        </div>
+      {/* Enlaces y Acciones: solo se muestra el contenedor si hay al menos un enlace (GitHub o Web) */}
+      {(project.githubUrl || project.liveUrl) && (
+        <div className="pt-4 border-t-2 border-[var(--border-main)] flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            {project.githubUrl && (
+              <Button
+                href={project.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="secondary"
+                size="icon"
+                aria-label={`Código fuente de ${project.title} en GitHub`}
+              >
+                <GithubIcon className="w-4 h-4" size={16} />
+              </Button>
+            )}
 
-        {project.liveUrl && (
-          <Button
-            href={project.liveUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="primary"
-            size="sm"
-          >
-            <span>Ver Proyecto</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </Button>
-        )}
-      </div>
+            {project.liveUrl && (
+              <Button
+                href={project.liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="secondary"
+                size="icon"
+                aria-label={`Sitio web de ${project.title}`}
+              >
+                <ExternalLink className="w-4 h-4 text-accent" />
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </article>
   );
 }

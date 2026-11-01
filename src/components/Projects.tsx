@@ -173,8 +173,8 @@ export function Projects() {
                 onClick={(e) => handleCardClick(e, idx)}
                 className={`shrink-0 snap-start flex transition-all duration-300 ease-out cursor-pointer ${
                   isActive
-                    ? "w-[88vw] sm:w-[520px] md:w-[600px] lg:w-[660px] opacity-100 z-10"
-                    : "w-[80vw] sm:w-[440px] md:w-[500px] lg:w-[540px] opacity-60 hover:opacity-85"
+                    ? "w-[85vw] sm:w-[500px] md:w-[565px] lg:w-[625px] opacity-100 z-10"
+                    : "w-[82vw] sm:w-[470px] md:w-[530px] lg:w-[590px] opacity-60 hover:opacity-85"
                 }`}
               >
                 <ProjectCard
