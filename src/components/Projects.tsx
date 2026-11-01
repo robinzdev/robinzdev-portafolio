@@ -171,7 +171,7 @@ export function Projects() {
               <div
                 key={project.id}
                 onClick={(e) => handleCardClick(e, idx)}
-                className={`shrink-0 snap-start flex transition-all duration-300 ease-out cursor-pointer ${
+                className={`shrink-0 snap-start flex h-full transition-all duration-300 ease-out cursor-pointer ${
                   isActive
                     ? "w-[88vw] sm:w-[520px] md:w-[600px] lg:w-[660px] opacity-100 z-10"
                     : "w-[80vw] sm:w-[440px] md:w-[500px] lg:w-[540px] opacity-60 hover:opacity-85"

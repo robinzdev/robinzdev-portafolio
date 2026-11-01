@@ -26,7 +26,7 @@ export function ProjectCard({
         featured ? "lg:col-span-2" : "col-span-1"
       } ${className}`.trim()}
     >
-      <div>
+      <div className="flex flex-col h-full">
         {/* Encabezado de la tarjeta */}
         <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b-2 border-[var(--border-main)]">
           <div className="flex items-center gap-2">
