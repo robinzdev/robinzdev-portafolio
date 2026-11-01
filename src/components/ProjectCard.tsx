@@ -22,7 +22,7 @@ export function ProjectCard({
 }: ProjectCardProps) {
   return (
     <article
-      className={`bg-[var(--bg-surface)] flex flex-col justify-between p-6 sm:p-7 relative h-full transition-colors ${
+      className={`bg-[var(--bg-surface)] flex flex-col justify-between p-6 sm:p-7 relative h-full min-h-[300px] transition-colors ${
         featured ? "lg:col-span-2" : "col-span-1"
       } ${className}`.trim()}
     >
