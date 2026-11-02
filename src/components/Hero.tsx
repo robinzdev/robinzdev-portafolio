@@ -35,7 +35,7 @@ export function Hero() {
               <span className="font-mono text-xs uppercase tracking-widest text-[var(--text-primary)] opacity-60 font-semibold block">
                 &gt; LICENCIADO EN INFORMÁTICA &amp; UI/UX DESIGNER // LOCATED IN CASTILLO, RD
               </span>
-              <VariableTextWave />
+              <VariableTextWave className="text-8xl sm:text-8xl md:text-9xl lg:text-[10rem] xl:text-[11.5rem]" />
             </div>
 
             {/* Párrafo de Impacto */}

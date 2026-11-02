@@ -56,26 +56,26 @@ export function SkillsAndEducation() {
         </div>
 
         {/* Bloque 1: Panel Unificado de Formación Académica & Certificaciones */}
-        <div className="bg-white border-2 border-[#131515] shadow-[4px_4px_0px_0px_#131515] p-6 sm:p-8 mb-10">
+        <div className="bg-white border-2 border-[#131515] shadow-[4px_4px_0px_0px_#131515] p-4 sm:p-8 mb-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
             
             {/* Columna Izquierda: Formación Académica (UASD) */}
             <div className="lg:col-span-6 lg:border-r-2 lg:border-[#131515]/15 lg:pr-10">
-              <div className="flex items-center justify-between pb-4 mb-5 border-b-2 border-[#131515]">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 border-2 border-[#131515] bg-accent text-[#131515]">
+              <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3 pb-4 mb-5 border-b-2 border-[#131515]">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2 border-2 border-[#131515] bg-accent text-[#131515] shrink-0">
                     <GraduationCap className="w-5 h-5" />
                   </div>
-                  <div>
-                    <h3 className="font-['Unbounded',sans-serif] text-base sm:text-lg font-bold uppercase text-[#131515]">
+                  <div className="min-w-0">
+                    <h3 className="font-['Unbounded',sans-serif] text-sm sm:text-base md:text-lg font-bold uppercase text-[#131515] leading-tight">
                       Formación Académica
                     </h3>
-                    <span className="font-mono text-xs text-[#4A5151]">
+                    <span className="font-mono text-[11px] sm:text-xs text-[#4A5151] block leading-tight">
                       Educación Superior Universitaria
                     </span>
                   </div>
                 </div>
-                <span className="font-mono text-xs px-2.5 py-1 bg-accent text-[#131515] font-bold border-2 border-[#131515] shadow-[2px_2px_0px_0px_#131515]">
+                <span className="self-start xs:self-center font-mono text-[11px] sm:text-xs px-2.5 py-1 bg-accent text-[#131515] font-bold border-2 border-[#131515] shadow-[2px_2px_0px_0px_#131515] shrink-0">
                   Titulado
                 </span>
               </div>
@@ -108,40 +108,40 @@ export function SkillsAndEducation() {
 
             {/* Columna Derecha: Certificaciones y Especializaciones */}
             <div className="lg:col-span-6">
-              <div className="flex items-center justify-between pb-4 mb-5 border-b-2 border-[#131515]">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 border-2 border-[#131515] bg-accent text-[#131515]">
+              <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3 pb-4 mb-5 border-b-2 border-[#131515]">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2 border-2 border-[#131515] bg-accent text-[#131515] shrink-0">
                     <Award className="w-5 h-5" />
                   </div>
-                  <div>
-                    <h3 className="font-['Unbounded',sans-serif] text-base sm:text-lg font-bold uppercase text-[#131515]">
+                  <div className="min-w-0">
+                    <h3 className="font-['Unbounded',sans-serif] text-sm sm:text-base md:text-lg font-bold uppercase text-[#131515] leading-tight">
                       Certificaciones
                     </h3>
-                    <span className="font-mono text-xs text-[#4A5151]">
+                    <span className="font-mono text-[11px] sm:text-xs text-[#4A5151] block leading-tight">
                       Especializaciones Continuas
                     </span>
                   </div>
                 </div>
-                <span className="font-mono text-xs px-2.5 py-1 bg-[#FFFAF0] text-[#131515] font-bold border-2 border-[#131515] shadow-[2px_2px_0px_0px_#131515]">
+                <span className="self-start xs:self-center font-mono text-[11px] sm:text-xs px-2.5 py-1 bg-[#FFFAF0] text-[#131515] font-bold border-2 border-[#131515] shadow-[2px_2px_0px_0px_#131515] shrink-0">
                   Acreditaciones
                 </span>
               </div>
 
-              <div className="space-y-2.5 max-h-[195px] sm:max-h-[215px] overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:#131515_#FFFAF0] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[#131515] [&::-webkit-scrollbar-track]:bg-[#FFFAF0]">
+              <div className="space-y-2.5 max-h-[220px] sm:max-h-[215px] overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:#131515_#FFFAF0] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[#131515] [&::-webkit-scrollbar-track]:bg-[#FFFAF0]">
                 {certificatesData.map((cert) => (
                   <div
                     key={cert.id}
                     className="p-3 border-2 border-[#131515] bg-[#FFFAF0] flex items-center justify-between gap-3 shadow-[2px_2px_0px_0px_#131515] hover:bg-white transition-all"
                   >
-                    <div className="space-y-0.5 min-w-0">
-                      <p className="font-mono text-xs font-bold text-[#131515] truncate">
+                    <div className="space-y-0.5 min-w-0 flex-1">
+                      <p className="font-mono text-xs font-bold text-[#131515] leading-snug break-words">
                         {cert.title}
                       </p>
-                      <p className="font-mono text-[11px] text-[#4A5151] truncate">
+                      <p className="font-mono text-[11px] text-[#4A5151] leading-tight break-words">
                         {cert.issuer}
                       </p>
                     </div>
-                    <span className="font-mono text-xs px-2 py-0.5 border border-[#131515] font-bold text-[#131515] bg-white shrink-0">
+                    <span className="font-mono text-xs px-2 py-0.5 border border-[#131515] font-bold text-[#131515] bg-white shrink-0 self-center">
                       {cert.year}
                     </span>
                   </div>
@@ -157,31 +157,31 @@ export function SkillsAndEducation() {
           {skillCategories.map((category) => (
             <div
               key={category.title}
-              className="bg-white border-2 border-[#131515] shadow-[4px_4px_0px_0px_#131515] p-6 sm:p-8 flex flex-col justify-between"
+              className="bg-white border-2 border-[#131515] shadow-[4px_4px_0px_0px_#131515] p-4 sm:p-8 flex flex-col justify-between"
             >
               <div>
-                <div className="flex items-center justify-between pb-4 mb-6 border-b-2 border-[#131515]">
-                  <div className="flex items-center gap-3">
+                <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3 pb-4 mb-6 border-b-2 border-[#131515]">
+                  <div className="flex items-center gap-3 min-w-0">
                     {category.category === "core" ? (
-                      <div className="p-2 border-2 border-[#131515] bg-accent text-[#131515]">
+                      <div className="p-2 border-2 border-[#131515] bg-accent text-[#131515] shrink-0">
                         <Cpu className="w-5 h-5" />
                       </div>
                     ) : (
-                      <div className="p-2 border-2 border-[#131515] bg-accent text-[#131515]">
+                      <div className="p-2 border-2 border-[#131515] bg-accent text-[#131515] shrink-0">
                         <Palette className="w-5 h-5" />
                       </div>
                     )}
-                    <div>
-                      <h3 className="font-['Unbounded',sans-serif] text-base sm:text-lg font-bold uppercase text-[#131515]">
+                    <div className="min-w-0">
+                      <h3 className="font-['Unbounded',sans-serif] text-sm sm:text-base md:text-lg font-bold uppercase text-[#131515] leading-tight">
                         {category.title}
                       </h3>
-                      <span className="font-mono text-xs text-[#4A5151]">
+                      <span className="font-mono text-[11px] sm:text-xs text-[#4A5151] block leading-tight">
                         {category.category === "core" ? "Desarrollo & Arquitectura" : "Diseño Gráfico & UI/UX"}
                       </span>
                     </div>
                   </div>
 
-                  <span className="font-mono text-xs px-2.5 py-1 bg-[#FFFAF0] text-[#131515] font-bold border-2 border-[#131515] shadow-[2px_2px_0px_0px_#131515] shrink-0">
+                  <span className="self-start xs:self-center font-mono text-[11px] sm:text-xs px-2.5 py-1 bg-[#FFFAF0] text-[#131515] font-bold border-2 border-[#131515] shadow-[2px_2px_0px_0px_#131515] shrink-0">
                     {category.skills.length} Tecnologías
                   </span>
                 </div>

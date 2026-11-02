@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { Menu, X, Folder, Briefcase, Cpu, Send } from "lucide-react";
@@ -16,6 +16,34 @@ interface NavLinkItem {
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  // Cerrar menú al hacer clic fuera o presionar Escape
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside, { passive: true });
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [mobileMenuOpen]);
 
   const navLinks: NavLinkItem[] = [
     {
@@ -45,14 +73,14 @@ export function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[var(--border-main)] bg-[var(--bg-primary)]/95 backdrop-blur-sm transition-colors">
+    <header ref={headerRef} className="sticky top-0 z-50 w-full border-b border-[var(--border-main)] bg-[var(--bg-primary)]/95 backdrop-blur-sm transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand identity */}
         <Link
           href="/"
           className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          <span className="font-['Unbounded',sans-serif] font-semibold text-sm sm:text-base tracking-tight lowercase text-[var(--text-primary)]">
+          <span className="font-['Unbounded',sans-serif] font-semibold text-lg sm:text-base tracking-tight lowercase text-[var(--text-primary)]">
             robin<span className="text-accent">.dev</span>
           </span>
         </Link>
@@ -98,31 +126,38 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer & Backdrop */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-6 space-y-4">
-          <nav className="flex flex-col space-y-2" aria-label="Navegación móvil">
-            {navLinks.map((link) => {
-              const Icon = link.icon;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 text-sm uppercase font-mono tracking-wider font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface-elevated)] px-3 py-2.5 transition-all group"
-                >
-                  <span
-                    className="w-7 h-7 flex items-center justify-center border border-[var(--border-main)] bg-[var(--bg-primary)] shrink-0 shadow-[1px_1px_0px_0px_var(--neo-shadow-color)]"
-                    style={{ color: link.color }}
+        <>
+          {/* Backdrop para cerrar al hacer clic fuera */}
+          <div
+            className="fixed inset-0 top-16 bg-black/40 backdrop-blur-[2px] md:hidden z-40 pointer-events-auto"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+
+          <div className="relative z-50 md:hidden border-t-2 border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-5 shadow-xl">
+            <nav className="flex flex-col space-y-2.5" aria-label="Navegación móvil">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3.5 text-xs uppercase font-['Unbounded',sans-serif] font-bold tracking-wide text-[var(--text-primary)] border-2 border-[var(--border-main)] bg-[var(--bg-primary)] hover:bg-[var(--bg-surface-elevated)] active:translate-x-[1px] active:translate-y-[1px] px-4 py-3 rounded-[8px] shadow-[2px_2px_0px_0px_var(--neo-shadow-color)] hover:shadow-none transition-all group"
                   >
-                    <Icon className="w-4 h-4 transition-all duration-200 fill-transparent group-hover:fill-current" />
-                  </span>
-                  <span>{link.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+                    <Icon
+                      className="w-4 h-4 shrink-0 transition-all duration-200 group-hover:scale-110 fill-transparent group-hover:fill-current"
+                      style={{ color: link.color }}
+                    />
+                    <span>{link.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        </>
       )}
     </header>
   );

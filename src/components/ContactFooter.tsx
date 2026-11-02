@@ -14,20 +14,21 @@ export function ContactFooter() {
   };
 
   return (
-    <footer id="contacto" className="border-t border-[var(--border-main)] bg-[var(--bg-primary)]">
+    <footer id="contacto" className="border-t border-[var(--border-main)] bg-[var(--bg-primary)] overflow-x-clip">
       {/* Sección de Contacto Centrada y Monumental */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-24 min-h-screen min-h-[100vh] min-h-[100dvh] flex flex-col items-center justify-center text-center">
-        
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 min-h-screen min-h-[100vh] min-h-[100dvh] flex flex-col items-center justify-center text-center">
+
         {/* Título Monumental con Efecto Variable Text Wave */}
         <div className="w-full mb-6 flex justify-center">
           <VariableTextWave
             as="h2"
             layout="column"
+            letterSpacing="-0.04em"
             words={[
               { text: "CONSTRUYAMOS", isAccent: false },
               { text: "JUNTOS.", isAccent: true },
             ]}
-            className="text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[9.5rem] tracking-tight leading-[0.92]"
+            className="text-4xl xs:text-5xl sm:text-6xl md:text-[4.75rem] lg:text-[5.75rem] xl:text-[6.75rem] 2xl:text-[7.25rem] tracking-[-0.04em] leading-[0.88]"
           />
         </div>
 
@@ -70,18 +71,18 @@ export function ContactFooter() {
       {/* Bloque Unificado de Cierre del Footer con Gravity Letters */}
       <div className="border-t-2 border-[var(--border-main)] bg-[var(--bg-surface)] pt-6">
         {/* Barra superior de créditos y botón volver arriba integrada */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
             <span className="font-['Unbounded',sans-serif] font-bold text-xs tracking-tight text-[var(--text-primary)]">
               ROBIN.DEV
             </span>
-            <span className="font-mono text-xs text-[var(--text-muted)]">
+            <span className="font-mono text-[11px] sm:text-xs text-[var(--text-muted)]">
               © 2025 · Todos los derechos reservados
             </span>
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="font-mono text-[11px] text-[var(--text-muted)]">
+            <span className="hidden sm:inline font-mono text-[11px] text-[var(--text-muted)]">
               Next.js 16 · Tailwind CSS · Framer Motion
             </span>
             <Button

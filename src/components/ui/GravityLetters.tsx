@@ -14,7 +14,7 @@ export interface GravityLettersProps {
   cutWidth?: number;
   /** Fuerza de expulsión al cortar o colapsar (0 a 3, por defecto 1.2) */
   throwForce?: number;
-  /** Habilitar colapso total en cascada al hacer clic (por defecto true) */
+  /** Habilitar colapso total en cascada al hacer clic o toque (por defecto true) */
   clickToCollapse?: boolean;
   /** Velocidad de propagación de la onda de corte en px/s al hacer clic (por defecto 1600) */
   collapseSpeed?: number;
@@ -161,6 +161,8 @@ export function GravityLetters({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const atlasCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const cellSizeRef = useRef<number>(24);
+  const atlasCellSizeRef = useRef<number>(24);
+  const dprRef = useRef<number>(1);
   const particlesRef = useRef<Particle[]>([]);
   const pileHeightsRef = useRef<Float32Array>(new Float32Array(0));
   const bfsVisitedRef = useRef<Uint8Array>(new Uint8Array(0));
@@ -168,6 +170,12 @@ export function GravityLetters({
   const animationFrameRef = useRef<number | null>(null);
   const isVisibleRef = useRef<boolean>(false);
   const collapseWaveRef = useRef<CollapseWave>({ active: false, originX: 0, originY: 0, startTime: 0 });
+
+  const currentCharSizeRef = useRef<number>(charSize);
+  const activeColWidthRef = useRef<number>(Math.max(charStepX, 8));
+  const activeStepYRef = useRef<number>(charStepY);
+  const lastTouchTimeRef = useRef<number>(0);
+  const touchStartPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const mousePosRef = useRef<{
     x: number;
@@ -185,28 +193,29 @@ export function GravityLetters({
     hasMoved: false,
   });
 
-  const colWidth = Math.max(charStepX, 8);
+  // Generación reactiva del Sprite Atlas pre-renderizado con escala nativa Retina (HiDPI) para evitar desenfoque
+  const buildAtlas = useCallback((overrideCharSize?: number) => {
+    const sizeToUse = overrideCharSize ?? currentCharSizeRef.current ?? charSize;
+    const dprToUse = dprRef.current || (typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1);
+    const baseCellSize = Math.ceil(sizeToUse * 2.0);
+    cellSizeRef.current = baseCellSize;
 
-  // Generación y actualización reactiva del Sprite Atlas de caracteres (soporta cambio de tema claro/oscuro en tiempo real)
-  const buildAtlas = useCallback(() => {
-    const cellSize = Math.ceil(charSize * 2.0);
-    cellSizeRef.current = cellSize;
-    const halfCell = cellSize / 2;
+    // Dimensionamos cada celda del atlas al DPR nativo exacto de la pantalla (1:1 físico)
+    const atlasCellSize = Math.ceil(baseCellSize * dprToUse);
+    atlasCellSizeRef.current = atlasCellSize;
+    const atlasHalfCell = atlasCellSize / 2;
 
     const atlasCanvas = document.createElement("canvas");
     const numGlyphs = GLYPH_CHARS.length;
     const totalSprites = numGlyphs * 2 * ATLAS_ANGLES;
     const rows = Math.ceil(totalSprites / ATLAS_COLS);
 
-    atlasCanvas.width = ATLAS_COLS * cellSize;
-    atlasCanvas.height = rows * cellSize;
+    atlasCanvas.width = ATLAS_COLS * atlasCellSize;
+    atlasCanvas.height = rows * atlasCellSize;
     const aCtx = atlasCanvas.getContext("2d");
 
     if (aCtx) {
-      aCtx.font = `bold ${charSize}px monospace`;
-      aCtx.textAlign = "center";
-      aCtx.textBaseline = "middle";
-
+      aCtx.imageSmoothingEnabled = false;
       const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
       const defaultColor = color || (isDark ? "#FFFAF0" : "#131515");
       const isStandardAccent = !accentColor || accentColor === "#9AD872";
@@ -215,6 +224,8 @@ export function GravityLetters({
         : (isStandardAccent ? "#4E872A" : accentColor);
       const colors = [defaultColor, resolvedAccent];
 
+      const physicalFontSize = Math.round(sizeToUse * dprToUse);
+
       for (let g = 0; g < numGlyphs; g++) {
         const char = GLYPH_CHARS[g];
         for (let c = 0; c < 2; c++) {
@@ -222,12 +233,15 @@ export function GravityLetters({
           for (let a = 0; a < ATLAS_ANGLES; a++) {
             const angle = a * ((2 * Math.PI) / ATLAS_ANGLES);
             const spriteIndex = (g * 2 + c) * ATLAS_ANGLES + a;
-            const sx = (spriteIndex % ATLAS_COLS) * cellSize + halfCell;
-            const sy = Math.floor(spriteIndex / ATLAS_COLS) * cellSize + halfCell;
+            const sx = (spriteIndex % ATLAS_COLS) * atlasCellSize + atlasHalfCell;
+            const sy = Math.floor(spriteIndex / ATLAS_COLS) * atlasCellSize + atlasHalfCell;
 
             aCtx.save();
             aCtx.translate(sx, sy);
             aCtx.rotate(angle);
+            aCtx.font = `bold ${physicalFontSize}px monospace`;
+            aCtx.textAlign = "center";
+            aCtx.textBaseline = "middle";
             aCtx.fillText(char, 0, 0);
             aCtx.restore();
           }
@@ -237,28 +251,33 @@ export function GravityLetters({
     }
   }, [charSize, color, accentColor]);
 
-  // Inicialización y muestreo con grafo de conectividad estructural
+  // Inicialización y muestreo con resolución adaptativa y filtrado de ruido estructural
   const initParticles = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
     const rect = container.getBoundingClientRect();
-    const dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) * Math.max(0.25, Math.min(quality, 1)) : 1;
-    const width = rect.width || window.innerWidth;
+    const dpr = typeof window !== "undefined" ? (window.devicePixelRatio || 1) * Math.max(0.25, Math.min(quality, 1)) : 1;
+    dprRef.current = dpr;
+    const width = Math.floor(rect.width || (typeof window !== "undefined" ? window.innerWidth : 1200));
 
     if (width <= 0) return;
 
-    // 1. Crear Sprite Atlas de caracteres pre-renderizados con rotación para evitar lag de transformaciones
-    buildAtlas();
-
-    // 2. Medir y muestrear silueta tipográfica a pantalla completa
+    // 1. Medir y dimensionar silueta tipográfica a pantalla completa
     const testCanvas = document.createElement("canvas");
     const testCtx = testCanvas.getContext("2d");
     if (!testCtx) return;
 
     const testFontSize = 100;
-    testCtx.font = `900 ${testFontSize}px ${fontFamily}`;
+    let activeFont = fontFamily;
+    if (typeof window !== "undefined") {
+      const computedFont = getComputedStyle(document.documentElement).getPropertyValue("--font-unbounded").trim();
+      if (computedFont) {
+        activeFont = `${computedFont}, ${fontFamily}`;
+      }
+    }
+    testCtx.font = `900 ${testFontSize}px ${activeFont}`;
     const testWidth1 = testCtx.measureText(line1).width;
     const testWidth2 = line2 ? testCtx.measureText(line2).width : 0;
     const maxTestWidth = Math.max(testWidth1, testWidth2);
@@ -267,17 +286,43 @@ export function GravityLetters({
     const fontSize = Math.max(Math.floor(testFontSize * (targetWidth / Math.max(maxTestWidth, 1))), 36);
     const lineHeight = fontSize * 0.95;
 
+    // Resolución adaptativa nítida: en pantallas estrechas (<640px o fontSize <160px),
+    // ajustamos proporcionalmente la matriz y el tamaño del carácter (mínimo 7px) para preservar
+    // la nitidez y los huecos de letras (O, B, R, D) sin perder cuerpo tipográfico.
+    // En escritorio (fontSize >= 160px), se mantiene exactamente la configuración de PC aprobada.
+    const isMobile = width < 640 || fontSize < 160;
+    const scaleFactor = Math.min(1, Math.max(0.5, fontSize / 200));
+    const effectiveCharSize = isMobile
+      ? Math.max(7, Math.min(charSize, Math.round(charSize * scaleFactor * 10) / 10))
+      : charSize;
+    const effectiveStepX = isMobile
+      ? Math.max(5, Math.min(charStepX, Math.round(charStepX * scaleFactor * 10) / 10))
+      : charStepX;
+    const effectiveStepY = isMobile
+      ? Math.max(7.5, Math.min(charStepY, Math.round(charStepY * scaleFactor * 10) / 10))
+      : charStepY;
+    const effectiveColWidth = isMobile
+      ? Math.max(effectiveStepX, 5)
+      : Math.max(charStepX, 8);
+
+    currentCharSizeRef.current = effectiveCharSize;
+    activeColWidthRef.current = effectiveColWidth;
+    activeStepYRef.current = effectiveStepY;
+
+    // Crear Sprite Atlas adaptado a la resolución nativa HiDPI
+    buildAtlas(effectiveCharSize);
+
     const textHeight = line2 ? fontSize + lineHeight : fontSize;
     const fallZone = Math.max(60, Math.min(width * 0.08, 110));
     const totalRequiredHeight = Math.max(minHeight, Math.ceil(textHeight + fallZone + 15));
 
     container.style.height = `${totalRequiredHeight}px`;
-    canvas.width = width * dpr;
-    canvas.height = totalRequiredHeight * dpr;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(totalRequiredHeight * dpr);
     canvas.style.width = `${width}px`;
     canvas.style.height = `${totalRequiredHeight}px`;
 
-    const numCols = Math.ceil(width / colWidth);
+    const numCols = Math.ceil(width / effectiveColWidth);
     pileHeightsRef.current = new Float32Array(numCols);
 
     const offCanvas = document.createElement("canvas");
@@ -289,7 +334,7 @@ export function GravityLetters({
     offCtx.fillStyle = "#FFFFFF";
     offCtx.textAlign = "center";
     offCtx.textBaseline = "middle";
-    offCtx.font = `900 ${fontSize}px ${fontFamily}`;
+    offCtx.font = `900 ${fontSize}px ${activeFont}`;
 
     const topPadding = Math.max(30, fontSize * 0.15);
     const line1Y = topPadding + fontSize * 0.45;
@@ -302,19 +347,21 @@ export function GravityLetters({
 
     const imgData = offCtx.getImageData(0, 0, width, totalRequiredHeight);
     const data = imgData.data;
-    const newParticles: Particle[] = [];
+    const stride = imgData.width;
+    const candidateParticles: Particle[] = [];
+    const alphaThreshold = isMobile ? 120 : 85;
 
-    for (let y = 0; y < totalRequiredHeight; y += charStepY) {
-      for (let x = 0; x < width; x += charStepX) {
-        const index = (y * width + x) * 4;
+    for (let y = 0; y < totalRequiredHeight; y += effectiveStepY) {
+      for (let x = 0; x < width; x += effectiveStepX) {
+        const index = (Math.floor(y) * stride + Math.floor(x)) * 4;
         const alpha = data[index + 3];
 
-        if (alpha > 85) {
+        if (alpha > alphaThreshold) {
           const char = GLYPH_CHARS[Math.floor(Math.random() * GLYPH_CHARS.length)];
           const isAccent = Math.random() < accentRatio;
-          const pileCol = Math.floor(x / colWidth);
+          const pileCol = Math.floor(x / effectiveColWidth);
 
-          newParticles.push({
+          candidateParticles.push({
             char,
             originX: x,
             originY: y,
@@ -342,14 +389,44 @@ export function GravityLetters({
       }
     }
 
+    // 2. Filtrar partículas huérfanas sin vecinos inmediatos (elimina artefactos flotantes en curvas)
+    const initialGrid = new Map<string, number>();
+    for (let i = 0; i < candidateParticles.length; i++) {
+      const p = candidateParticles[i];
+      const gx = Math.round(p.originX / effectiveStepX);
+      const gy = Math.round(p.originY / effectiveStepY);
+      initialGrid.set(`${gx},${gy}`, i);
+    }
+
+    const newParticles: Particle[] = [];
+    for (let i = 0; i < candidateParticles.length; i++) {
+      const p = candidateParticles[i];
+      const gx = Math.round(p.originX / effectiveStepX);
+      const gy = Math.round(p.originY / effectiveStepY);
+
+      let neighborsCount = 0;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dx === 0 && dy === 0) continue;
+          if (initialGrid.has(`${gx + dx},${gy + dy}`)) {
+            neighborsCount++;
+          }
+        }
+      }
+
+      if (neighborsCount > 0) {
+        newParticles.push(p);
+      }
+    }
+
     // 3. Construir grafo de conectividad estructural para separación de bloques (Enfoque B)
     const gridMap = new Map<string, number>();
     const numP = newParticles.length;
 
     for (let i = 0; i < numP; i++) {
       const p = newParticles[i];
-      const gx = Math.round(p.originX / charStepX);
-      const gy = Math.round(p.originY / charStepY);
+      const gx = Math.round(p.originX / effectiveStepX);
+      const gy = Math.round(p.originY / effectiveStepY);
       gridMap.set(`${gx},${gy}`, i);
     }
 
@@ -368,12 +445,12 @@ export function GravityLetters({
     }
 
     // Anclas estructurales: exclusivamente las 2 filas superiores de cada palabra
-    const anchorBand = charStepY * 2.2;
+    const anchorBand = effectiveStepY * 2.2;
 
     for (let i = 0; i < numP; i++) {
       const p = newParticles[i];
-      const gx = Math.round(p.originX / charStepX);
-      const gy = Math.round(p.originY / charStepY);
+      const gx = Math.round(p.originX / effectiveStepX);
+      const gy = Math.round(p.originY / effectiveStepY);
 
       // Conexión en 8 direcciones para un contorno natural y fidedigno del trazo
       const nList: number[] = [];
@@ -400,11 +477,13 @@ export function GravityLetters({
 
     particlesRef.current = newParticles;
     collapseWaveRef.current.active = false;
-  }, [line1, line2, widthPercent, charStepX, charStepY, accentRatio, colWidth, fontFamily, minHeight, quality, returnDuration, buildAtlas]);
+  }, [line1, line2, widthPercent, charSize, charStepX, charStepY, accentRatio, fontFamily, minHeight, quality, returnDuration, buildAtlas]);
 
   // Manejador del colapso natural por clic
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (performance.now() - lastTouchTimeRef.current < 600) return;
     if (!clickToCollapse || paused) return;
+    if (typeof window !== "undefined" && window.innerWidth < 640) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -439,20 +518,26 @@ export function GravityLetters({
         return;
       }
 
-      const dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) * Math.max(0.25, Math.min(quality, 1)) : 1;
+      const dpr = dprRef.current || 1;
       const width = canvas.width / dpr;
       const height = canvas.height / dpr;
       const now = performance.now();
       const atlas = atlasCanvasRef.current;
       const cellSize = cellSizeRef.current;
       const halfCell = cellSize / 2;
+      const atlasCellSize = atlasCellSizeRef.current;
+
+      const activeStepY = activeStepYRef.current;
+      const activeColWidth = activeColWidthRef.current;
+      const activeCharSize = currentCharSizeRef.current;
 
       ctx.save();
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, width, height);
       ctx.globalAlpha = opacity;
+      ctx.imageSmoothingEnabled = false;
 
-      const floorY = height - Math.floor(charSize * 0.5);
+      const floorY = height - Math.floor(activeCharSize * 0.5);
       const mouse = mousePosRef.current;
       const hasSlice = mouse.active && mouse.hasMoved;
       const sliceVectorX = mouse.x - mouse.prevX;
@@ -482,7 +567,7 @@ export function GravityLetters({
       for (let i = 0; i < len; i++) {
         const p = particles[i];
 
-        // 1. Colapso natural por clic sin freeze
+        // 1. Colapso natural por clic o toque sin freeze
         if (wave.active && p.state === "idle") {
           const ddx = p.x - wave.originX;
           const ddy = p.y - wave.originY;
@@ -495,7 +580,7 @@ export function GravityLetters({
           }
         }
 
-        // 2. Corte vectorial por cursor sobre el texto principal
+        // 2. Corte vectorial por cursor o desplazamiento táctil sobre el texto principal
         if (hasSlice && p.state === "idle") {
           const distSq = distToSegmentSq(p.x, p.y, mouse.prevX, mouse.prevY, mouse.x, mouse.y);
           if (distSq < effectiveCutSq) {
@@ -510,7 +595,7 @@ export function GravityLetters({
           }
         }
 
-        // 3. Inicio del retorno individual al cumplirse los 4 segundos en el suelo
+        // 3. Inicio del retorno individual al cumplirse el tiempo en el suelo
         if (p.state === "ground" && p.healTime > 0 && now >= p.healTime) {
           p.state = "returning";
           p.healTime = 0;
@@ -520,7 +605,7 @@ export function GravityLetters({
           p.returnStartAngle = p.angle;
 
           if (p.pileCol >= 0 && p.pileCol < numCols) {
-            pileHeights[p.pileCol] = Math.max(0, pileHeights[p.pileCol] - charStepY);
+            pileHeights[p.pileCol] = Math.max(0, pileHeights[p.pileCol] - activeStepY);
           }
 
           const travelDist = Math.hypot(p.originX - p.x, p.originY - p.y);
@@ -546,7 +631,7 @@ export function GravityLetters({
             p.vx = -Math.abs(p.vx) * 0.3;
           }
 
-          const col = Math.floor(p.x / colWidth);
+          const col = Math.floor(p.x / activeColWidth);
           if (col >= 0 && col < numCols) {
             const currentPileHeight = pileHeights[col];
             const targetGround = floorY - currentPileHeight;
@@ -555,20 +640,20 @@ export function GravityLetters({
               const leftCol = Math.max(0, col - 1);
               const rightCol = Math.min(numCols - 1, col + 1);
 
-              if (col > 0 && currentPileHeight - pileHeights[leftCol] > charSize * 1.5 && Math.random() < 0.6) {
-                p.x = Math.max(12, p.x - colWidth * 0.7);
+              if (col > 0 && currentPileHeight - pileHeights[leftCol] > activeCharSize * 1.5 && Math.random() < 0.6) {
+                p.x = Math.max(12, p.x - activeColWidth * 0.7);
                 p.vx = -1.4;
-                p.y = Math.min(p.y, targetGround + charSize * 0.5);
-              } else if (col < numCols - 1 && currentPileHeight - pileHeights[rightCol] > charSize * 1.5 && Math.random() < 0.6) {
-                p.x = Math.min(width - 12, p.x + colWidth * 0.7);
+                p.y = Math.min(p.y, targetGround + activeCharSize * 0.5);
+              } else if (col < numCols - 1 && currentPileHeight - pileHeights[rightCol] > activeCharSize * 1.5 && Math.random() < 0.6) {
+                p.x = Math.min(width - 12, p.x + activeColWidth * 0.7);
                 p.vx = 1.4;
-                p.y = Math.min(p.y, targetGround + charSize * 0.5);
+                p.y = Math.min(p.y, targetGround + activeCharSize * 0.5);
               } else {
                 p.state = "ground";
                 p.y = targetGround;
                 p.x += (Math.random() - 0.5) * 3;
                 p.angle += (Math.random() - 0.5) * 0.35;
-                pileHeights[col] += charSize * 0.65;
+                pileHeights[col] += activeCharSize * 0.65;
                 p.pileCol = col;
                 p.vy = 0;
                 p.vx = 0;
@@ -595,29 +680,27 @@ export function GravityLetters({
             const currentPileHeight = pileHeights[col];
             const targetGround = floorY - currentPileHeight;
 
-            // Si el suelo bajo este grano descendió (porque otros granos ya despegaron), se asienta
             if (p.y < targetGround - 1) {
               p.y += Math.min(3.0, (targetGround - p.y) * 0.22);
               p.x += (Math.random() - 0.5) * 0.5;
               p.angle += (Math.random() - 0.5) * 0.05;
             }
 
-            // Deslizamiento natural por pendiente si la columna contigua se vació
             const leftCol = Math.max(0, col - 1);
             const rightCol = Math.min(numCols - 1, col + 1);
 
-            if (col > 0 && currentPileHeight - pileHeights[leftCol] > charSize * 1.8 && Math.random() < 0.06) {
-              pileHeights[col] = Math.max(0, pileHeights[col] - charSize * 0.5);
-              pileHeights[leftCol] += charSize * 0.5;
+            if (col > 0 && currentPileHeight - pileHeights[leftCol] > activeCharSize * 1.8 && Math.random() < 0.06) {
+              pileHeights[col] = Math.max(0, pileHeights[col] - activeCharSize * 0.5);
+              pileHeights[leftCol] += activeCharSize * 0.5;
               p.pileCol = leftCol;
-              p.x -= colWidth * 0.6;
-              p.y = Math.min(floorY, p.y + charSize * 0.5);
-            } else if (col < numCols - 1 && currentPileHeight - pileHeights[rightCol] > charSize * 1.8 && Math.random() < 0.06) {
-              pileHeights[col] = Math.max(0, pileHeights[col] - charSize * 0.5);
-              pileHeights[rightCol] += charSize * 0.5;
+              p.x -= activeColWidth * 0.6;
+              p.y = Math.min(floorY, p.y + activeCharSize * 0.5);
+            } else if (col < numCols - 1 && currentPileHeight - pileHeights[rightCol] > activeCharSize * 1.8 && Math.random() < 0.06) {
+              pileHeights[col] = Math.max(0, pileHeights[col] - activeCharSize * 0.5);
+              pileHeights[rightCol] += activeCharSize * 0.5;
               p.pileCol = rightCol;
-              p.x += colWidth * 0.6;
-              p.y = Math.min(floorY, p.y + charSize * 0.5);
+              p.x += activeColWidth * 0.6;
+              p.y = Math.min(floorY, p.y + activeCharSize * 0.5);
             }
           }
         } else if (p.state === "returning") {
@@ -641,17 +724,30 @@ export function GravityLetters({
           }
         }
 
-        // 5. Renderizado ultra-rápido por Texture Atlas (0 lag de GPU)
+        // 5. Renderizado pixel-perfect por Texture Atlas nativo en HiDPI (0 blur)
         if (atlas) {
           const gIdx = GLYPH_MAP[p.char] ?? 0;
           const colorIdx = (p.state !== "idle" || p.isAccent) ? 1 : 0;
           const normalizedAngle = (p.angle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
           const angleIdx = Math.floor((normalizedAngle / (2 * Math.PI)) * ATLAS_ANGLES) % ATLAS_ANGLES;
           const spriteIndex = (gIdx * 2 + colorIdx) * ATLAS_ANGLES + angleIdx;
-          const sx = (spriteIndex % ATLAS_COLS) * cellSize;
-          const sy = Math.floor(spriteIndex / ATLAS_COLS) * cellSize;
+          const sx = (spriteIndex % ATLAS_COLS) * atlasCellSize;
+          const sy = Math.floor(spriteIndex / ATLAS_COLS) * atlasCellSize;
 
-          ctx.drawImage(atlas, sx, sy, cellSize, cellSize, p.x - halfCell, p.y - halfCell, cellSize, cellSize);
+          const drawX = Math.round(p.x - halfCell);
+          const drawY = Math.round(p.y - halfCell);
+
+          ctx.drawImage(
+            atlas,
+            sx,
+            sy,
+            atlasCellSize,
+            atlasCellSize,
+            drawX,
+            drawY,
+            cellSize,
+            cellSize
+          );
         }
       }
 
@@ -719,19 +815,15 @@ export function GravityLetters({
       }
     };
   }, [
-    colWidth,
     gravity,
     friction,
     opacity,
     cutWidth,
     throwForce,
-    charStepY,
     healDelay,
     paused,
-    quality,
     collapseSpeed,
     returnDuration,
-    charSize,
   ]);
 
   // Observer de visibilidad para 0% CPU fuera de pantalla
@@ -742,13 +834,16 @@ export function GravityLetters({
     const observer = new IntersectionObserver(
       ([entry]) => {
         isVisibleRef.current = entry.isIntersecting;
+        if (entry.isIntersecting && particlesRef.current.length === 0) {
+          initParticles();
+        }
       },
-      { threshold: 0.05 }
+      { threshold: 0 }
     );
 
     observer.observe(container);
     return () => observer.disconnect();
-  }, []);
+  }, [initParticles]);
 
   // Redimensionado reactivo y espera a que las fuentes estén cargadas
   useEffect(() => {
@@ -798,8 +893,9 @@ export function GravityLetters({
     return () => observer.disconnect();
   }, [buildAtlas]);
 
-  // Manejadores de interacción táctil y ratón para corte
+  // Manejadores de interacción táctil y ratón para corte y colapso
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (performance.now() - lastTouchTimeRef.current < 600) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -827,7 +923,26 @@ export function GravityLetters({
     mousePosRef.current.prevY = -1000;
   };
 
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    lastTouchTimeRef.current = performance.now();
+    const canvas = canvasRef.current;
+    if (!canvas || e.touches.length === 0) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const touchX = e.touches[0].clientX - rect.left;
+    const touchY = e.touches[0].clientY - rect.top;
+
+    touchStartPosRef.current = { x: touchX, y: touchY };
+    mousePosRef.current.x = touchX;
+    mousePosRef.current.y = touchY;
+    mousePosRef.current.prevX = touchX;
+    mousePosRef.current.prevY = touchY;
+    mousePosRef.current.active = false;
+    mousePosRef.current.hasMoved = false;
+  };
+
   const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    lastTouchTimeRef.current = performance.now();
     const canvas = canvasRef.current;
     if (!canvas || e.touches.length === 0) return;
 
@@ -835,18 +950,27 @@ export function GravityLetters({
     const currX = e.touches[0].clientX - rect.left;
     const currY = e.touches[0].clientY - rect.top;
 
-    if (!mousePosRef.current.active) {
-      mousePosRef.current.prevX = currX;
-      mousePosRef.current.prevY = currY;
-    }
+    // Solo activa el corte si el usuario desliza intencionalmente el dedo (más de 6px)
+    const distFromStart = Math.hypot(
+      currX - touchStartPosRef.current.x,
+      currY - touchStartPosRef.current.y
+    );
 
-    mousePosRef.current.x = currX;
-    mousePosRef.current.y = currY;
-    mousePosRef.current.active = true;
-    mousePosRef.current.hasMoved = true;
+    if (distFromStart > 6) {
+      if (!mousePosRef.current.active) {
+        mousePosRef.current.prevX = currX;
+        mousePosRef.current.prevY = currY;
+      }
+
+      mousePosRef.current.x = currX;
+      mousePosRef.current.y = currY;
+      mousePosRef.current.active = true;
+      mousePosRef.current.hasMoved = true;
+    }
   };
 
   const handleTouchEnd = () => {
+    lastTouchTimeRef.current = performance.now();
     mousePosRef.current.active = false;
     mousePosRef.current.hasMoved = false;
     mousePosRef.current.x = -1000;
@@ -863,9 +987,10 @@ export function GravityLetters({
         onClick={handleCanvasClick}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="w-full h-full cursor-crosshair block"
+        className="w-full h-full sm:cursor-crosshair cursor-default block touch-pan-y"
       />
     </div>
   );

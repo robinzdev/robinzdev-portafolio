@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { projectsData } from "@/data/portfolioData";
 import { ProjectCard } from "@/components/ProjectCard";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 export function Projects() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -21,7 +22,7 @@ export function Projects() {
       (cards[index] as HTMLElement).scrollIntoView({
         behavior: "smooth",
         block: "nearest",
-        inline: "start",
+        inline: typeof window !== "undefined" && window.innerWidth < 640 ? "center" : "start",
       });
       setCurrentIndex(index);
     }
@@ -101,7 +102,15 @@ export function Projects() {
         let minDistance = Infinity;
 
         cards.forEach((card, idx) => {
-          const distance = Math.abs(card.offsetLeft - container.offsetLeft - scrollLeft);
+          const isMobile = window.innerWidth < 640;
+          const distance = isMobile
+            ? Math.abs(
+              card.offsetLeft -
+              container.offsetLeft +
+              card.clientWidth / 2 -
+              (scrollLeft + container.clientWidth / 2)
+            )
+            : Math.abs(card.offsetLeft - container.offsetLeft - scrollLeft);
           if (distance < minDistance) {
             minDistance = distance;
             closestIndex = idx;
@@ -122,7 +131,7 @@ export function Projects() {
   return (
     <section ref={sectionRef} id="proyectos" className="py-20 border-b border-[var(--border-main)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Cabecera de Sección */}
         <div className="mb-12 pb-6 border-b border-[var(--border-main)]">
           <div className="space-y-2 max-w-xl">
@@ -171,11 +180,10 @@ export function Projects() {
               <div
                 key={project.id}
                 onClick={(e) => handleCardClick(e, idx)}
-                className={`shrink-0 snap-start flex transition-all duration-300 ease-out cursor-pointer ${
-                  isActive
-                    ? "w-[85vw] sm:w-[500px] md:w-[565px] lg:w-[625px] opacity-100 z-10"
-                    : "w-[82vw] sm:w-[470px] md:w-[530px] lg:w-[590px] opacity-60 hover:opacity-85"
-                }`}
+                className={`shrink-0 snap-center sm:snap-start flex transition-all duration-300 ease-out cursor-pointer ${isActive
+                  ? "w-[calc(100vw-2rem)] sm:w-[500px] md:w-[565px] lg:w-[625px] opacity-100 z-10"
+                  : "w-[calc(100vw-2rem)] sm:w-[470px] md:w-[530px] lg:w-[590px] opacity-60 hover:opacity-85"
+                  }`}
               >
                 <ProjectCard
                   project={project}
@@ -190,23 +198,27 @@ export function Projects() {
         {/* Controles de Navegación del Carrusel (Abajo a la Izquierda) */}
         <div className="flex items-center gap-3.5 mt-6 pt-2">
           <div className="flex items-center gap-2.5">
-            <button
+            <Button
               type="button"
               onClick={handlePrev}
               aria-label="Proyecto anterior"
-              className="p-3 border-2 border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-[3px_3px_0px_0px_var(--neo-shadow-color)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-[8px]"
+              variant="secondary"
+              size="icon"
+              className="p-3 touch-manipulation"
             >
               <ArrowLeft className="w-5 h-5" />
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               onClick={handleNext}
               aria-label="Siguiente proyecto"
-              className="p-3 border-2 border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-[3px_3px_0px_0px_var(--neo-shadow-color)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-[8px]"
+              variant="secondary"
+              size="icon"
+              className="p-3 touch-manipulation"
             >
               <ArrowRight className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
 
           {/* Numeración simple */}

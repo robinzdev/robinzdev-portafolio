@@ -61,8 +61,8 @@ export function ProjectCard({
               key={tag}
               title={tag}
               className={`select-none flex items-center justify-center transition-opacity duration-200 text-[var(--text-primary)] ${isActive
-                  ? "opacity-100 cursor-default"
-                  : "opacity-40 hover:opacity-75 cursor-pointer"
+                ? "opacity-100 cursor-default"
+                : "opacity-40 hover:opacity-75 cursor-pointer"
                 }`}
             >
               <TechIcon

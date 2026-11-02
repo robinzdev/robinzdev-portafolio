@@ -9,6 +9,7 @@ export interface VariableTextWaveProps {
   layout?: "row" | "column" | "wrap";
   restWght?: number;
   restWdth?: number;
+  letterSpacing?: string;
 }
 
 export function VariableTextWave({
@@ -18,6 +19,7 @@ export function VariableTextWave({
   layout = "wrap",
   restWght,
   restWdth,
+  letterSpacing,
 }: VariableTextWaveProps) {
   const containerRef = useRef<HTMLHeadingElement>(null);
   const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
@@ -31,9 +33,9 @@ export function VariableTextWave({
       words && words.length > 0
         ? words
         : [
-            { text: "ROBIN", isAccent: false },
-            { text: "DEV.", isAccent: true },
-          ],
+          { text: "ROBIN", isAccent: false },
+          { text: "DEV.", isAccent: true },
+        ],
     [words]
   );
 
@@ -181,29 +183,27 @@ export function VariableTextWave({
   }, []);
 
   let globalIndex = 0;
-  const defaultSizeClasses = "text-6xl sm:text-8xl md:text-9xl lg:text-[10rem] xl:text-[11.5rem]";
+  const defaultSizeClasses = "tracking-tight text-6xl sm:text-8xl md:text-9xl lg:text-[10rem] xl:text-[11.5rem]";
 
   return (
     <Component
       ref={containerRef}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
-      className={`font-['Roboto_Flex',sans-serif] tracking-tight uppercase leading-[0.95] cursor-default select-none ${
-        layout === "column"
+      className={`font-['Roboto_Flex',sans-serif] uppercase leading-[0.95] cursor-default select-none ${layout === "column"
           ? "flex flex-col items-center justify-center w-full"
           : "inline-flex flex-wrap items-baseline gap-x-4 sm:gap-x-7"
-      } ${className || defaultSizeClasses}`.trim()}
+        } ${className || defaultSizeClasses}`.trim()}
     >
       {textGroups.map((group, groupIdx) => {
         const letters = group.text.split("");
         return (
           <span
             key={groupIdx}
-            className={`inline-flex whitespace-nowrap ${
-              group.isAccent ? "text-accent" : "text-[var(--text-primary)]"
-            }`}
+            className={`inline-flex whitespace-nowrap ${group.isAccent ? "text-accent" : "text-[var(--text-primary)]"
+              }`}
           >
-            {letters.map((char) => {
+            {letters.map((char, charIdx) => {
               const currentIndex = globalIndex++;
 
               return (
@@ -216,6 +216,7 @@ export function VariableTextWave({
                     display: "inline-block",
                     fontVariationSettings: `"wght" ${REST_WGHT}, "wdth" ${REST_WDTH}`,
                     willChange: "font-variation-settings",
+                    ...(letterSpacing && charIdx < letters.length - 1 ? { marginRight: letterSpacing } : {}),
                   }}
                 >
                   {char}
