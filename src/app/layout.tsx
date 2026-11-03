@@ -34,6 +34,12 @@ export const metadata: Metadata = {
   description: "Portafolio profesional de Robin (robinzdev). Licenciado en Informática, Desarrollador Full-Stack y Diseñador Gráfico. Arquitectura web neobrutalista y retro-tech.",
   keywords: ["Full-Stack Developer", "Vite", "React", "TypeScript", "Tailwind CSS", "UI/UX Designer", "Neobrutalism", "Castillo", "República Dominicana"],
   authors: [{ name: "Robin" }],
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/robinzdev_forwhite.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -47,7 +53,7 @@ export default function RootLayout({
         className="min-h-screen flex flex-col font-sans selection:bg-accent selection:text-[#131515]"
         suppressHydrationWarning
       >
-        
+
         <ThemeProvider>
           {children}
         </ThemeProvider>

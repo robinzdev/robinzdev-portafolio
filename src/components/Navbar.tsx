@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { LucideIcon } from "lucide-react";
 import { Menu, X, Folder, Briefcase, Cpu, Send } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -78,10 +79,29 @@ export function Navbar() {
         {/* Brand identity */}
         <Link
           href="/"
-          className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
+          {/* Isotipo adaptativo al tema */}
+          <div className="relative w-7 h-7 shrink-0 transition-transform duration-200 group-hover:scale-105">
+            <Image
+              src="/robinzdev_forwhite.svg"
+              alt="robinzdev logo"
+              width={28}
+              height={28}
+              priority
+              className="dark:hidden w-7 h-7 object-contain"
+            />
+            <Image
+              src="/robinzdev_forblack.svg"
+              alt="robinzdev logo"
+              width={28}
+              height={28}
+              priority
+              className="hidden dark:block w-7 h-7 object-contain"
+            />
+          </div>
           <span className="font-['Unbounded',sans-serif] font-semibold text-lg sm:text-base tracking-tight lowercase text-[var(--text-primary)]">
-            robin<span className="text-accent">.dev</span>
+            robinz<span className="text-accent">dev</span>
           </span>
         </Link>
 

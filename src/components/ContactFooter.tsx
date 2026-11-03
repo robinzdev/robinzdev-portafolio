@@ -74,7 +74,7 @@ export function ContactFooter() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
             <span className="font-['Unbounded',sans-serif] font-bold text-xs tracking-tight text-[var(--text-primary)]">
-              ROBIN.DEV
+              ROBINZDEV
             </span>
             <span className="font-mono text-[11px] sm:text-xs text-[var(--text-muted)]">
               © 2025 · Todos los derechos reservados
