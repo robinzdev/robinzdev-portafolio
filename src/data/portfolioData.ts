@@ -44,7 +44,6 @@ export const projectsData: Project[] = [
     description: "Arquitectura desacoplada con Supabase RLS multi-tenant, índices B-Tree y triggers PostgreSQL. Motor frontend en React 19 con reordenamiento drag-and-drop por histéresis y editor TipTap.",
     tags: ["React", "Next.js", "TypeScript", "Tailwind CSS", "Supabase", "PostgreSQL"],
     role: "Full-Stack & Software Architect",
-    githubUrl: "https://github.com/robinfdezz/Noteezy.git",
     featured: true,
     year: "2026",
   },

@@ -17,6 +17,7 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
   const [sweepKey, setSweepKey] = useState(0);
   const [currentMedia, setCurrentMedia] = useState<"photo" | "video">("photo");
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const isTransitioningRef = useRef<boolean>(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const mediaCycleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const scheduleNextMediaSwitchRef = useRef<() => void>(() => {});
@@ -64,7 +65,8 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
 
   // Transición quirúrgica tipo glitch entre foto y video holográfico
   const triggerMediaTransition = useCallback(() => {
-    if (!isVisibleRef.current) return;
+    if (!isVisibleRef.current || isTransitioningRef.current) return;
+    isTransitioningRef.current = true;
 
     // Fase 1: perturbación electromagnética (glitch intenso y split RGB)
     setIsGlitching(true);
@@ -83,7 +85,7 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
           if (videoRef.current) {
             videoRef.current.pause();
           }
-          // Regreso a foto: programar siguiente ciclo aleatorio entre 15s y 50s
+          // Regreso a foto: programar siguiente ciclo aleatorio entre 30s y 60s
           scheduleNextMediaSwitchRef.current();
         }
         return next;
@@ -94,8 +96,18 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
     setTimeout(() => {
       setIsGlitching(false);
       setIsTransitioning(false);
+      isTransitioningRef.current = false;
     }, 360);
   }, []);
+
+  // Anticipar la transición de salida ~240ms antes del fin del video para que el glitch corte en pleno movimiento
+  const handleVideoTimeUpdate = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || isTransitioningRef.current) return;
+    if (video.duration > 0 && video.currentTime >= video.duration - 0.24) {
+      triggerMediaTransition();
+    }
+  }, [triggerMediaTransition]);
 
   // Programador orgánico con cadencia aleatoria de 30 a 60 segundos
   const scheduleNextMediaSwitch = useCallback(() => {
@@ -282,7 +294,7 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
               fill
               priority
               unoptimized
-              className={`object-cover object-center transition-all duration-300 ${
+              className={`object-cover object-center transition-opacity duration-150 ${
                 currentMedia === "photo" ? "opacity-100 scale-100" : "opacity-0 scale-[1.02] pointer-events-none"
               } ${isGlitching ? "scale-[1.04]" : ""}`}
               sizes="(max-width: 768px) 85vw, 380px"
@@ -295,8 +307,9 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
               playsInline
               muted
               preload="auto"
+              onTimeUpdate={handleVideoTimeUpdate}
               onEnded={triggerMediaTransition}
-              className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-300 ${
+              className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-150 ${
                 currentMedia === "video" ? "opacity-100 scale-100" : "opacity-0 scale-[1.02] pointer-events-none"
               } ${isGlitching ? "scale-[1.04]" : ""}`}
               style={{
