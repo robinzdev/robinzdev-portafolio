@@ -40,23 +40,31 @@ Sitio web personal y portafolio interactivo de Robin, Licenciado en Informática
    - Rendimiento extremo (Texture Atlas): pre-renderizado de glifos en hoja de sprites fuera de pantalla, eliminando cálculos de transformación en cada frame (0.2 ms por cuadro).
    - Reactividad en tiempo real ante cambio de tema claro/oscuro mediante MutationObserver sin reiniciar partículas.
 
-4. Barra de navegación contextual (Navbar):
-   - Inspirada en la interfaz técnica de plataformas contemporáneas de desarrollo.
+4. Barra de navegación contextual e isotipo adaptativo (Navbar):
+   - Identidad de marca unificada bajo robinzdev con isotipo SVG adaptativo de alta resolución (`robinzdev_forwhite.svg` en tema claro y `robinzdev_forblack.svg` en tema oscuro) con conmutación instantánea mediante clases CSS sin destellos de hidratación.
    - Cada enlace cuenta con su respectivo icono temático y color característico (Proyectos en Cyan, Experiencia en Ámbar, Habilidades en Púrpura, Contacto en Verde Marca).
    - Navegación por anclajes calibrada con espaciado uniforme respecto a la barra fija.
    - Adaptable a dispositivos móviles con menú lateral accesible por teclado.
 
-5. Modo oscuro y claro sincronizado (ThemeProvider) con View Transitions:
+5. Consola retro-tech 3D con avatar holográfico y glitch quirúrgico (HeroCard3D):
+   - Tarjeta interactiva con físicas 3D reactivas al cursor (`rotateX`, `rotateY`, `smoothZ`) montada sobre placa posterior de acento verde.
+   - Efecto CRT analógico: líneas de escaneo, máscara de fósforo triada, viñeta de tubo catódico y haz de barrido electrónico con cadencia y velocidad orgánica no repetitiva.
+   - Conmutación quirúrgica tipo glitch entre fotografía estática optimizada (`mifoto.webp`) y avatar holográfico animado (`mipersonajeanimado.webm`).
+   - Ciclo estocástico controlado: conmutación automática en intervalos aleatorios de entre 30 y 60 segundos con retorno suave a la imagen tras concluir la reproducción (9.4s).
+   - Eficiencia energética y 60 FPS: suspensión integral de la animación de barrido, video y temporizadores mediante IntersectionObserver al salir del viewport (0% de CPU en reposo).
+   - Ajuste de viewport responsivo: contención fija a 95vh (`lg:min-h-[95vh] lg:max-h-[95vh]`) en pantallas de escritorio y flujo libre vertical sin recortes en dispositivos móviles.
+
+6. Modo oscuro y claro sincronizado (ThemeProvider) con View Transitions:
    - Implementación basada en useSyncExternalStore de React 19 para prevenir parpadeos y desajustes de hidratación (hydration mismatch).
    - Transición visual cinemática mediante View Transition API con revelado circular progresivo desde las coordenadas del cursor.
    - Paleta de color centralizada en variables CSS (--color-accent-brand: #9AD872) con alto contraste accesible en modo claro (#4E872A).
 
-6. Secciones completas de portafolio y microinteracciones:
-   - Hero: Titular brutalista, microespecificaciones técnicas y consola DEV_ID con avatar retro-tech.
-   - Proyectos: Catálogo de iniciativas con roles, etiquetas de tecnologías, carrusel responsivo y enlaces directos.
+7. Secciones completas de portafolio y microinteracciones:
+   - Hero: Titular brutalista con efecto tipográfico dinámico (VariableTextWave), microespecificaciones técnicas y consola interactiva DEV_ID.
+   - Proyectos: Catálogo de iniciativas con pestañas estilo carpeta neobrutalista, roles, etiquetas de tecnologías, carrusel responsivo y enlaces directos.
    - Experiencia: Línea de tiempo cronológica con avance progresivo continuo de riel verde acento sin cortes entre hitos, e iconos SVG técnicos de cada tecnología (TechIcons).
    - Competencias y Estudios: Clasificación por competencias técnicas de desarrollo y diseño UI/UX, formación universitaria en UASD y certificaciones.
-   - Contacto: Canal directo con botón de copiado rápido y formulario validado con simulación de envío y estado de confirmación.
+   - Contacto y Footer: Canal directo con botón de copiado rápido, formulario validado, créditos interactivos con física de partículas (GravityLetters) y año de copyright sincronizado dinámicamente.
    - Animaciones controladas: Ejecución estricta de una sola vez por carga de página (`viewport: { once: true }`), evitando reinicios distractores al desplazarse entre secciones.
 
 ## Estructura del Proyecto

@@ -77,7 +77,7 @@ export function ContactFooter() {
               ROBINZDEV
             </span>
             <span className="font-mono text-[11px] sm:text-xs text-[var(--text-muted)]">
-              © 2025 · Todos los derechos reservados
+              © {new Date().getFullYear()} · Todos los derechos reservados
             </span>
           </div>
 

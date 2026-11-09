@@ -15,6 +15,12 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
   const [isSweeping, setIsSweeping] = useState(false);
   const [sweepDuration, setSweepDuration] = useState(2.8);
   const [sweepKey, setSweepKey] = useState(0);
+  const [currentMedia, setCurrentMedia] = useState<"photo" | "video">("photo");
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const mediaCycleTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const scheduleNextMediaSwitchRef = useRef<() => void>(() => {});
+  const isVisibleRef = useRef<boolean>(true);
 
   const glitchTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sweepTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,6 +62,58 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
     }, 400);
   }, []);
 
+  // Transición quirúrgica tipo glitch entre foto y video holográfico
+  const triggerMediaTransition = useCallback(() => {
+    if (!isVisibleRef.current) return;
+
+    // Fase 1: perturbación electromagnética (glitch intenso y split RGB)
+    setIsGlitching(true);
+    setIsTransitioning(true);
+
+    // Fase 2: Conmutar media a mitad del glitch (140ms)
+    setTimeout(() => {
+      setCurrentMedia((prev) => {
+        const next = prev === "photo" ? "video" : "photo";
+        if (next === "video") {
+          if (videoRef.current) {
+            videoRef.current.currentTime = 0;
+            videoRef.current.play().catch(() => {});
+          }
+        } else {
+          if (videoRef.current) {
+            videoRef.current.pause();
+          }
+          // Regreso a foto: programar siguiente ciclo aleatorio entre 15s y 50s
+          scheduleNextMediaSwitchRef.current();
+        }
+        return next;
+      });
+    }, 140);
+
+    // Fase 3: Estabilizar señal
+    setTimeout(() => {
+      setIsGlitching(false);
+      setIsTransitioning(false);
+    }, 360);
+  }, []);
+
+  // Programador orgánico con cadencia aleatoria de 30 a 60 segundos
+  const scheduleNextMediaSwitch = useCallback(() => {
+    if (mediaCycleTimerRef.current) clearTimeout(mediaCycleTimerRef.current);
+    if (!isVisibleRef.current) return;
+
+    // Aleatorio entre 30 y 60 segundos (30000 a 60000 ms)
+    const delay = Math.floor(Math.random() * (60000 - 30000 + 1)) + 30000;
+
+    mediaCycleTimerRef.current = setTimeout(() => {
+      triggerMediaTransition();
+    }, delay);
+  }, [triggerMediaTransition]);
+
+  useEffect(() => {
+    scheduleNextMediaSwitchRef.current = scheduleNextMediaSwitch;
+  }, [scheduleNextMediaSwitch]);
+
   // Programador orgánico del haz de escáner con cadencia y velocidad aleatorias
   const scheduleNextSweep = useCallback((customDelay?: number) => {
     if (sweepTimerRef.current) clearTimeout(sweepTimerRef.current);
@@ -77,13 +135,14 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
     scheduleNextSweep();
   }, [scheduleNextSweep]);
 
-  // Ciclo de vida: primer barrido suave y micro-glitches ambientales esporádicos
+  // Ciclo de vida: primer barrido suave, micro-glitches e IntersectionObserver (0% CPU)
   useEffect(() => {
     scheduleNextSweep(1400);
+    scheduleNextMediaSwitch();
 
-    // Pequeñas fluctuaciones de sintonización analógica espontáneas cada 10-18s
+    // Pequeñas fluctuaciones de sintonización analógica espontáneas cada 12-22s
     const scheduleNextAmbientGlitch = () => {
-      const nextDelay = Math.floor(Math.random() * 8000 + 10000);
+      const nextDelay = Math.floor(Math.random() * 10000 + 12000);
       ambientGlitchTimerRef.current = setTimeout(() => {
         setIsGlitching(true);
         setTimeout(() => setIsGlitching(false), 220);
@@ -93,12 +152,44 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
 
     scheduleNextAmbientGlitch();
 
+    // IntersectionObserver para pausar animaciones y video al salir del viewport (0% CPU en reposo)
+    const card = cardRef.current;
+    let observer: IntersectionObserver | null = null;
+    if (card && typeof IntersectionObserver !== "undefined") {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            isVisibleRef.current = entry.isIntersecting;
+            if (!entry.isIntersecting) {
+              if (videoRef.current && !videoRef.current.paused) {
+                videoRef.current.pause();
+              }
+              if (mediaCycleTimerRef.current) clearTimeout(mediaCycleTimerRef.current);
+              if (sweepTimerRef.current) clearTimeout(sweepTimerRef.current);
+              if (ambientGlitchTimerRef.current) clearTimeout(ambientGlitchTimerRef.current);
+            } else {
+              if (currentMedia === "video" && videoRef.current) {
+                videoRef.current.play().catch(() => {});
+              } else {
+                scheduleNextMediaSwitch();
+              }
+              scheduleNextSweep(1200);
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+      observer.observe(card);
+    }
+
     return () => {
+      if (observer) observer.disconnect();
       if (sweepTimerRef.current) clearTimeout(sweepTimerRef.current);
       if (ambientGlitchTimerRef.current) clearTimeout(ambientGlitchTimerRef.current);
       if (glitchTimerRef.current) clearTimeout(glitchTimerRef.current);
+      if (mediaCycleTimerRef.current) clearTimeout(mediaCycleTimerRef.current);
     };
-  }, [scheduleNextSweep]);
+  }, [scheduleNextSweep, scheduleNextMediaSwitch, currentMedia]);
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
@@ -182,38 +273,64 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
             </span>
           </div>
 
-          {/* Área contenedora para la foto con efectos CRT y Aberración Cromática */}
+          {/* Área contenedora para la foto/video con efectos CRT y Aberración Cromática */}
           <div className="relative aspect-square w-full border-2 border-[var(--border-main)] bg-[var(--bg-primary)] overflow-hidden group">
-            {/* Imagen Base */}
+            {/* Imagen Base (Foto) */}
             <Image
-              src="/mifoto.jpg"
+              src="/mifoto.webp"
               alt="Robinzon Gabino - Desarrollador & Diseñador"
               fill
               priority
               unoptimized
-              className={`object-cover object-center transition-transform duration-200 ${
-                isGlitching ? "scale-[1.03]" : "scale-100"
-              }`}
+              className={`object-cover object-center transition-all duration-300 ${
+                currentMedia === "photo" ? "opacity-100 scale-100" : "opacity-0 scale-[1.02] pointer-events-none"
+              } ${isGlitching ? "scale-[1.04]" : ""}`}
               sizes="(max-width: 768px) 85vw, 380px"
             />
 
-            {/* Capas de Aberración Cromática (Glitch RGB) */}
-            {(isHovered || isGlitching) && (
+            {/* Video WebM optimizado (Avatar Holográfico) */}
+            <video
+              ref={videoRef}
+              src="/mipersonajeanimado.webm"
+              playsInline
+              muted
+              preload="auto"
+              onEnded={triggerMediaTransition}
+              className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-300 ${
+                currentMedia === "video" ? "opacity-100 scale-100" : "opacity-0 scale-[1.02] pointer-events-none"
+              } ${isGlitching ? "scale-[1.04]" : ""}`}
+              style={{
+                filter:
+                  isGlitching && currentMedia === "video"
+                    ? "drop-shadow(-3px 0 0 rgba(255, 40, 40, 0.7)) drop-shadow(3px 0 0 rgba(40, 255, 255, 0.7)) saturate(150%)"
+                    : "none",
+              }}
+            />
+
+            {/* Pulso de interferencia electromagnética durante la conmutación */}
+            {isTransitioning && (
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 pointer-events-none z-20 bg-accent/20 mix-blend-screen animate-pulse"
+              />
+            )}
+
+            {/* Capas de Aberración Cromática (Glitch RGB) - Solo activas durante el pulso de glitch, nunca fijas en hover */}
+            {isGlitching && currentMedia === "photo" && (
               <>
                 {/* Canal Rojo / Magenta (Desplazado a la izquierda) */}
                 <div
                   aria-hidden="true"
                   className="absolute inset-0 pointer-events-none mix-blend-screen opacity-75 overflow-hidden transition-transform duration-100"
                   style={{
-                    transform: isGlitching ? "translate(-4px, 1.5px)" : "translate(-2px, 0.5px)",
+                    transform: "translate(-4px, 1.5px)",
                     filter: "drop-shadow(-2px 0 0 rgba(255, 40, 40, 0.8)) saturate(180%)",
-                    clipPath: isGlitching
-                      ? "polygon(0 12%, 100% 12%, 100% 28%, 0 28%, 0 58%, 100% 58%, 100% 74%, 0 74%)"
-                      : "none",
+                    clipPath:
+                      "polygon(0 12%, 100% 12%, 100% 28%, 0 28%, 0 58%, 100% 58%, 100% 74%, 0 74%)",
                   }}
                 >
                   <Image
-                    src="/mifoto.jpg"
+                    src="/mifoto.webp"
                     alt=""
                     fill
                     unoptimized
@@ -226,15 +343,14 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
                   aria-hidden="true"
                   className="absolute inset-0 pointer-events-none mix-blend-screen opacity-75 overflow-hidden transition-transform duration-100"
                   style={{
-                    transform: isGlitching ? "translate(4px, -1.5px)" : "translate(2px, -0.5px)",
+                    transform: "translate(4px, -1.5px)",
                     filter: "drop-shadow(2px 0 0 rgba(40, 255, 255, 0.8)) saturate(180%)",
-                    clipPath: isGlitching
-                      ? "polygon(0 22%, 100% 22%, 100% 42%, 0 42%, 0 72%, 100% 72%, 100% 88%, 0 88%)"
-                      : "none",
+                    clipPath:
+                      "polygon(0 22%, 100% 22%, 100% 42%, 0 42%, 0 72%, 100% 72%, 100% 88%, 0 88%)",
                   }}
                 >
                   <Image
-                    src="/mifoto.jpg"
+                    src="/mifoto.webp"
                     alt=""
                     fill
                     unoptimized
@@ -300,8 +416,8 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
           <div className="mt-4 pt-3 border-t-2 border-[var(--border-main)] flex items-center justify-between text-[11px] font-mono">
             <span className="text-[var(--text-muted)] font-light">STATUS</span>
             <span className="font-light text-[var(--accent-green)] flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              ONLINE (60 FPS)
+              <span className={`w-2 h-2 rounded-full ${currentMedia === "video" ? "bg-accent animate-ping" : "bg-accent animate-pulse"}`} />
+              {currentMedia === "video" ? "AVATAR // STREAMING" : "ONLINE (60 FPS)"}
             </span>
           </div>
         </div>
