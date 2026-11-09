@@ -3,6 +3,41 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { Volume2, VolumeX } from "lucide-react";
+import {
+  connectAudioElementToAnalyser,
+  resumeHeroAudioContext,
+  suspendHeroAudioContext,
+} from "@/lib/heroAudio";
+
+interface MusicTrack {
+  title: string;
+  artist: string;
+  src: string;
+}
+
+const MUSIC_TRACKS: MusicTrack[] = [
+  {
+    title: "Daylight",
+    artist: "David Kushner",
+    src: "/music/David Kushner Daylight Official Music Video.mp3",
+  },
+  {
+    title: "East Duo",
+    artist: "East Duo",
+    src: "/music/East Duo.mp3",
+  },
+  {
+    title: "Too Sweet",
+    artist: "Hozier",
+    src: "/music/Hozier Too Sweet Official Video.mp3",
+  },
+  {
+    title: "7 Years",
+    artist: "Lukas Graham",
+    src: "/music/Lukas Graham 7 Years Official Music Video.mp3",
+  },
+];
 
 interface HeroCard3DProps {
   className?: string;
@@ -21,7 +56,135 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const mediaCycleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const scheduleNextMediaSwitchRef = useRef<() => void>(() => {});
+  const triggerMediaTransitionRef = useRef<() => void>(() => {});
   const isVisibleRef = useRef<boolean>(true);
+  const currentMediaRef = useRef<"photo" | "video">("photo");
+
+  useEffect(() => {
+    currentMediaRef.current = currentMedia;
+  }, [currentMedia]);
+
+  // Estados y referencias para control de audio (inicia siempre en OFF)
+  const [isAudioEnabled, setIsAudioEnabled] = useState(false);
+  const [activeTrack, setActiveTrack] = useState<MusicTrack | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioFadeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isAudioEnabledRef = useRef<boolean>(false);
+  const lastTrackIndexRef = useRef<number>(-1);
+
+  // Asegurar que en cada precarga/recarga inicie siempre en OFF
+  useEffect(() => {
+    try {
+      localStorage.removeItem("hero_audio_enabled");
+    } catch {}
+    setIsAudioEnabled(false);
+    isAudioEnabledRef.current = false;
+  }, []);
+
+  useEffect(() => {
+    isAudioEnabledRef.current = isAudioEnabled;
+  }, [isAudioEnabled]);
+
+  const stopAudio = useCallback((immediate = false) => {
+    if (audioFadeTimerRef.current) {
+      clearInterval(audioFadeTimerRef.current);
+      audioFadeTimerRef.current = null;
+    }
+    const audio = audioRef.current;
+    if (audio) {
+      if (immediate) {
+        audio.pause();
+        audio.currentTime = 0;
+      } else {
+        try {
+          let vol = audio.volume;
+          audioFadeTimerRef.current = setInterval(() => {
+            vol = Math.max(0, vol - 0.25);
+            audio.volume = vol;
+            if (vol <= 0) {
+              if (audioFadeTimerRef.current) {
+                clearInterval(audioFadeTimerRef.current);
+                audioFadeTimerRef.current = null;
+              }
+              audio.pause();
+              audio.currentTime = 0;
+            }
+          }, 30);
+        } catch {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      }
+    }
+    setActiveTrack(null);
+    suspendHeroAudioContext();
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("hero-audio-active", { detail: { active: false } }));
+    }
+  }, []);
+
+  const startAudio = useCallback(() => {
+    // Detener de forma inmediata y unívoca cualquier reproducción o fade previo
+    if (audioFadeTimerRef.current) {
+      clearInterval(audioFadeTimerRef.current);
+      audioFadeTimerRef.current = null;
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    } else {
+      audioRef.current = new Audio();
+      audioRef.current.preload = "auto";
+    }
+
+    // Conectar el elemento de audio al analizador de frecuencias Web Audio
+    connectAudioElementToAnalyser(audioRef.current);
+    resumeHeroAudioContext();
+
+    // Selección aleatoria inteligente (evita repetir la misma canción dos veces seguidas)
+    let nextIndex = Math.floor(Math.random() * MUSIC_TRACKS.length);
+    if (MUSIC_TRACKS.length > 1 && nextIndex === lastTrackIndexRef.current) {
+      nextIndex = (nextIndex + 1 + Math.floor(Math.random() * (MUSIC_TRACKS.length - 1))) % MUSIC_TRACKS.length;
+    }
+    lastTrackIndexRef.current = nextIndex;
+    const track = MUSIC_TRACKS[nextIndex];
+    setActiveTrack(track);
+
+    const audio = audioRef.current;
+    audio.src = track.src;
+    audio.volume = 0.75;
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("hero-audio-active", { detail: { active: true } }));
+    }
+  }, []);
+
+  const toggleAudio = useCallback(() => {
+    setIsAudioEnabled((prev) => {
+      const next = !prev;
+      isAudioEnabledRef.current = next;
+
+      if (!next) {
+        // Al apagar manualmente: corte rotundo e instantáneo de sonido
+        stopAudio(true);
+        // Si ya superó la mitad del video (tramo de reversa), transicionar a foto directamente
+        if (videoRef.current && videoRef.current.currentTime >= 9.15) {
+          triggerMediaTransitionRef.current();
+        }
+      } else if (currentMediaRef.current === "video") {
+        // Al encender durante la reproducción del video:
+        // Reiniciar el video a 0 para que empiece sincronizado desde el inicio con la música
+        // y se reproduzca la ida y vuelta continua en reversa (~18.5s)
+        if (videoRef.current) {
+          videoRef.current.currentTime = 0;
+          videoRef.current.play().catch(() => {});
+        }
+        startAudio();
+      }
+      return next;
+    });
+  }, [stopAudio, startAudio]);
 
   const glitchTimerRef = useRef<NodeJS.Timeout | null>(null);
   const sweepTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -74,22 +237,28 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
 
     // Fase 2: Conmutar media a mitad del glitch (140ms)
     setTimeout(() => {
-      setCurrentMedia((prev) => {
-        const next = prev === "photo" ? "video" : "photo";
-        if (next === "video") {
-          if (videoRef.current) {
-            videoRef.current.currentTime = 0;
-            videoRef.current.play().catch(() => {});
-          }
-        } else {
-          if (videoRef.current) {
-            videoRef.current.pause();
-          }
-          // Regreso a foto: programar siguiente ciclo aleatorio entre 30s y 60s
-          scheduleNextMediaSwitchRef.current();
+      const next = currentMediaRef.current === "photo" ? "video" : "photo";
+      currentMediaRef.current = next;
+      setCurrentMedia(next);
+
+      if (next === "video") {
+        if (videoRef.current) {
+          videoRef.current.currentTime = 0;
+          videoRef.current.play().catch(() => {});
         }
-        return next;
-      });
+        if (isAudioEnabledRef.current) {
+          startAudio();
+        } else {
+          setActiveTrack(null);
+        }
+      } else {
+        if (videoRef.current) {
+          videoRef.current.pause();
+        }
+        stopAudio(false);
+        // Regreso a foto: programar siguiente ciclo
+        scheduleNextMediaSwitchRef.current();
+      }
     }, 140);
 
     // Fase 3: Estabilizar señal
@@ -98,15 +267,32 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
       setIsTransitioning(false);
       isTransitioningRef.current = false;
     }, 360);
-  }, []);
+  }, [stopAudio, startAudio]);
 
-  // Anticipar la transición de salida ~240ms antes del fin del video para que el glitch corte en pleno movimiento
+  useEffect(() => {
+    triggerMediaTransitionRef.current = triggerMediaTransition;
+  }, [triggerMediaTransition]);
+
+  // Manejo de reproducción continua:
+  // - Audio OFF: reproduce la ida frontal (~9.15s) y corta con glitch hacia la foto.
+  // - Audio ON: reproduce la ida y vuelta continua en reversa hasta el final (~18.45s) regresando suavemente a la pose inicial.
   const handleVideoTimeUpdate = useCallback(() => {
     const video = videoRef.current;
     if (!video || isTransitioningRef.current) return;
-    if (video.duration > 0 && video.currentTime >= video.duration - 0.24) {
-      triggerMediaTransition();
+
+    if (!isAudioEnabledRef.current) {
+      if (video.currentTime >= 9.15) {
+        triggerMediaTransition();
+      }
+    } else {
+      if (video.duration > 0 && video.currentTime >= video.duration - 0.25) {
+        triggerMediaTransition();
+      }
     }
+  }, [triggerMediaTransition]);
+
+  const handleVideoEnded = useCallback(() => {
+    triggerMediaTransition();
   }, [triggerMediaTransition]);
 
   // Programador orgánico con cadencia aleatoria de 30 a 60 segundos
@@ -164,7 +350,7 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
 
     scheduleNextAmbientGlitch();
 
-    // IntersectionObserver para pausar animaciones y video al salir del viewport (0% CPU en reposo)
+    // IntersectionObserver para pausar animaciones, video y audio al salir del viewport (0% CPU en reposo)
     const card = cardRef.current;
     let observer: IntersectionObserver | null = null;
     if (card && typeof IntersectionObserver !== "undefined") {
@@ -176,14 +362,28 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
               if (videoRef.current && !videoRef.current.paused) {
                 videoRef.current.pause();
               }
+              if (audioRef.current && !audioRef.current.paused) {
+                audioRef.current.pause();
+                suspendHeroAudioContext();
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("hero-audio-active", { detail: { active: false } }));
+                }
+              }
               if (mediaCycleTimerRef.current) clearTimeout(mediaCycleTimerRef.current);
               if (sweepTimerRef.current) clearTimeout(sweepTimerRef.current);
               if (ambientGlitchTimerRef.current) clearTimeout(ambientGlitchTimerRef.current);
             } else {
-              if (currentMedia === "video" && videoRef.current) {
+              if (currentMediaRef.current === "video" && videoRef.current) {
                 videoRef.current.play().catch(() => {});
-              } else {
-                scheduleNextMediaSwitch();
+                if (isAudioEnabledRef.current && audioRef.current && audioRef.current.paused) {
+                  resumeHeroAudioContext();
+                  audioRef.current.play().catch(() => {});
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("hero-audio-active", { detail: { active: true } }));
+                  }
+                }
+              } else if (currentMediaRef.current === "photo") {
+                scheduleNextMediaSwitchRef.current();
               }
               scheduleNextSweep(1200);
             }
@@ -196,12 +396,20 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
 
     return () => {
       if (observer) observer.disconnect();
+      if (audioFadeTimerRef.current) {
+        clearInterval(audioFadeTimerRef.current);
+        audioFadeTimerRef.current = null;
+      }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
       if (sweepTimerRef.current) clearTimeout(sweepTimerRef.current);
       if (ambientGlitchTimerRef.current) clearTimeout(ambientGlitchTimerRef.current);
       if (glitchTimerRef.current) clearTimeout(glitchTimerRef.current);
       if (mediaCycleTimerRef.current) clearTimeout(mediaCycleTimerRef.current);
     };
-  }, [scheduleNextSweep, scheduleNextMediaSwitch, currentMedia]);
+  }, [scheduleNextSweep, scheduleNextMediaSwitch]);
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
@@ -294,22 +502,24 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
               fill
               priority
               unoptimized
-              className={`object-cover object-center transition-opacity duration-150 ${
+              draggable={false}
+              className={`object-cover object-center select-none pointer-events-none transition-opacity duration-150 ${
                 currentMedia === "photo" ? "opacity-100 scale-100" : "opacity-0 scale-[1.02] pointer-events-none"
               } ${isGlitching ? "scale-[1.04]" : ""}`}
               sizes="(max-width: 768px) 85vw, 380px"
             />
 
-            {/* Video WebM optimizado (Avatar Holográfico) */}
+            {/* Video WebM optimizado (Avatar Holográfico en Loop Fluido Continuo) */}
             <video
               ref={videoRef}
-              src="/mipersonajeanimado.webm"
+              src="/mipersonajeanimado_loop.webm"
               playsInline
               muted
               preload="auto"
+              draggable={false}
               onTimeUpdate={handleVideoTimeUpdate}
-              onEnded={triggerMediaTransition}
-              className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-150 ${
+              onEnded={handleVideoEnded}
+              className={`absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none transition-opacity duration-150 ${
                 currentMedia === "video" ? "opacity-100 scale-100" : "opacity-0 scale-[1.02] pointer-events-none"
               } ${isGlitching ? "scale-[1.04]" : ""}`}
               style={{
@@ -347,7 +557,8 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
                     alt=""
                     fill
                     unoptimized
-                    className="object-cover object-center"
+                    draggable={false}
+                    className="object-cover object-center select-none pointer-events-none"
                   />
                 </div>
 
@@ -367,7 +578,8 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
                     alt=""
                     fill
                     unoptimized
-                    className="object-cover object-center"
+                    draggable={false}
+                    className="object-cover object-center select-none pointer-events-none"
                   />
                 </div>
               </>
@@ -410,6 +622,26 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
               />
             )}
 
+            {/* Control de audio (Solo visible durante la transmisión del video) */}
+            {currentMedia === "video" && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleAudio();
+                }}
+                className={`absolute bottom-3 left-3 z-20 flex items-center justify-center w-9 h-9 rounded-[10px] border-none opacity-70 hover:opacity-100 transition-all duration-150 cursor-pointer ${
+                  isAudioEnabled
+                    ? "text-[var(--accent-green)] bg-black hover:scale-105"
+                    : "text-white/80 bg-black/60 hover:text-white hover:scale-105"
+                }`}
+                title={isAudioEnabled ? "Desactivar audio" : "Activar audio"}
+                aria-label={isAudioEnabled ? "Audio activado" : "Audio desactivado"}
+              >
+                {isAudioEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+              </button>
+            )}
+
             {/* Marcas de registro en esquinas estilo blueprint */}
             <span className="absolute top-2 left-2 font-mono text-[10px] text-white/70 select-none leading-none opacity-60 font-light pointer-events-none z-10">
               +
@@ -417,20 +649,34 @@ export function HeroCard3D({ className = "" }: HeroCard3DProps) {
             <span className="absolute top-2 right-2 font-mono text-[10px] text-white/70 select-none leading-none opacity-60 font-light pointer-events-none z-10">
               +
             </span>
-            <span className="absolute bottom-2 left-2 font-mono text-[10px] text-white/70 select-none leading-none opacity-60 font-light pointer-events-none z-10">
-              +
-            </span>
+            {currentMedia !== "video" && (
+              <span className="absolute bottom-2 left-2 font-mono text-[10px] text-white/70 select-none leading-none opacity-60 font-light pointer-events-none z-10">
+                +
+              </span>
+            )}
             <span className="absolute bottom-2 right-2 font-mono text-[10px] text-white/70 select-none leading-none opacity-60 font-light pointer-events-none z-10">
               +
             </span>
           </div>
 
           {/* Pie de credencial */}
-          <div className="mt-4 pt-3 border-t-2 border-[var(--border-main)] flex items-center justify-between text-[11px] font-mono">
-            <span className="text-[var(--text-muted)] font-light">STATUS</span>
-            <span className="font-light text-[var(--accent-green)] flex items-center gap-1.5">
+          <div className="mt-4 pt-3 border-t-2 border-[var(--border-main)] flex items-center justify-between text-[11px] font-mono gap-2">
+            <span className="text-[var(--text-muted)] font-light truncate">
+              {currentMedia === "video" && activeTrack ? (
+                <span className="text-[10px] text-[var(--text-main)] truncate inline-block max-w-[190px] align-bottom">
+                  ♫ {activeTrack.artist} - {activeTrack.title}
+                </span>
+              ) : (
+                "STATUS"
+              )}
+            </span>
+            <span className="font-light text-[var(--accent-green)] flex items-center gap-1.5 shrink-0">
               <span className={`w-2 h-2 rounded-full ${currentMedia === "video" ? "bg-accent animate-ping" : "bg-accent animate-pulse"}`} />
-              {currentMedia === "video" ? "AVATAR // STREAMING" : "ONLINE (60 FPS)"}
+              {currentMedia === "video"
+                ? isAudioEnabled
+                  ? "AVATAR // AUDIO 2X"
+                  : "AVATAR // STREAMING"
+                : "ONLINE (60 FPS)"}
             </span>
           </div>
         </div>

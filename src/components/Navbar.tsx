@@ -82,14 +82,15 @@ export function Navbar() {
           className="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           {/* Isotipo adaptativo al tema */}
-          <div className="relative w-7 h-7 shrink-0 transition-transform duration-200 group-hover:scale-105">
+          <div className="relative w-7 h-7 shrink-0 transition-transform duration-200 group-hover:scale-105 pointer-events-none select-none">
             <Image
               src="/robinzdev_forwhite.svg"
               alt="robinzdev logo"
               width={28}
               height={28}
               priority
-              className="dark:hidden w-7 h-7 object-contain"
+              draggable={false}
+              className="dark:hidden w-7 h-7 object-contain select-none pointer-events-none"
             />
             <Image
               src="/robinzdev_forblack.svg"
@@ -97,7 +98,8 @@ export function Navbar() {
               width={28}
               height={28}
               priority
-              className="hidden dark:block w-7 h-7 object-contain"
+              draggable={false}
+              className="hidden dark:block w-7 h-7 object-contain select-none pointer-events-none"
             />
           </div>
           <span className="font-['Unbounded',sans-serif] font-semibold text-lg sm:text-base tracking-tight lowercase text-[var(--text-primary)]">

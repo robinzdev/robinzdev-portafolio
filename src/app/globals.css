@@ -159,3 +159,9 @@ h1, h2, h3, h4, h5, h6 {
 ::view-transition-new(root) {
   z-index: 9999;
 }
+
+/* Deshabilitar arrastre nativo de imágenes y videos */
+img, video {
+  -webkit-user-drag: none;
+  user-select: none;
+}

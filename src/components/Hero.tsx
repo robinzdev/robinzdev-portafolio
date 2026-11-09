@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { MovingGrid } from "@/components/ui/MovingGrid";
 import { VariableTextWave } from "@/components/ui/VariableTextWave";
 import { HeroCard3D } from "@/components/ui/HeroCard3D";
+import { HeroEqualizer } from "@/components/ui/HeroEqualizer";
 
 export function Hero() {
   return (
@@ -18,9 +19,12 @@ export function Hero() {
       gridSize={36}
       speed={7}
       initialDirection="down-right"
-      className="w-full min-h-0 lg:min-h-[95vh] lg:min-h-[95dvh] lg:max-h-[95vh] lg:max-h-[95dvh] flex flex-col justify-center border-b border-[var(--border-main)] py-12 sm:py-16 lg:py-0"
+      className="relative w-full min-h-0 lg:min-h-[95vh] lg:min-h-[95dvh] lg:max-h-[95vh] lg:max-h-[95dvh] flex flex-col justify-center border-b border-[var(--border-main)] overflow-hidden"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto">
+      {/* Ecualizador de espectro retro sutil en el fondo derecho */}
+      <HeroEqualizer />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto py-12 sm:py-16 lg:py-0">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
 
           {/* Columna Izquierda: Información Principal */}
